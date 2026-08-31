@@ -161,52 +161,6 @@
                             <span class="text-[10px] text-slate-400 block font-sans">(<span id="stat-total-seats">--</span> seats reserved)</span>
                         </div>
                     </div>
-
-                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
-                        <!-- Date -->
-                        <div class="flex items-start space-x-3">
-                            <div class="w-10 h-10 rounded-lg bg-navy-950 border border-gold-500/30 flex items-center justify-center text-gold-400 shrink-0 mt-0.5">
-                                <i class="fa-regular fa-calendar-days text-base"></i>
-                            </div>
-                            <div>
-                                <span class="text-xs text-slate-400 uppercase font-semibold block">Date</span>
-                                <span id="event-date" class="text-white font-medium">COMING SOON...</span>
-                            </div>
-                        </div>
-
-                        <!-- Time -->
-                        <div class="flex items-start space-x-3">
-                            <div class="w-10 h-10 rounded-lg bg-navy-950 border border-gold-500/30 flex items-center justify-center text-gold-400 shrink-0 mt-0.5">
-                                <i class="fa-regular fa-clock text-base"></i>
-                            </div>
-                            <div>
-                                <span class="text-xs text-slate-400 uppercase font-semibold block">Time</span>
-                                <span id="event-time" class="text-white font-medium">TBD</span>
-                            </div>
-                        </div>
-
-                        <!-- Venue -->
-                        <div class="flex items-start space-x-3">
-                            <div class="w-10 h-10 rounded-lg bg-navy-950 border border-gold-500/30 flex items-center justify-center text-gold-400 shrink-0 mt-0.5">
-                                <i class="fa-solid fa-church text-base"></i>
-                            </div>
-                            <div>
-                                <span class="text-xs text-slate-400 uppercase font-semibold block">Venue</span>
-                                <span id="event-venue" class="text-white font-medium">TBD</span>
-                            </div>
-                        </div>
-
-                        <!-- Location -->
-                        <div class="flex items-start space-x-3">
-                            <div class="w-10 h-10 rounded-lg bg-navy-950 border border-gold-500/30 flex items-center justify-center text-gold-400 shrink-0 mt-0.5">
-                                <i class="fa-solid fa-location-dot text-base"></i>
-                            </div>
-                            <div>
-                                <span class="text-xs text-slate-400 uppercase font-semibold block">Location</span>
-                                <span id="event-location" class="text-white font-medium">TBD</span>
-                            </div>
-                        </div>
-                    </div>
                 </div>
 
                 <!-- Footer note in Left panel -->
@@ -643,17 +597,13 @@ USING (true);
     <script>
         /**
          * EVENT CONFIGURATION OBJECT
-         * All event parameters are centralized here for easy edits.
+         * Centralized event parameters (Date, time, venue and location removed as requested)
          */
         const EVENT_CONFIG = {
             title: "TIME WITH JOE GHARTEY-TAGOE",
             speakerName: "JOE GHARTEY-TAGOE",
             tagline: '"An Encounter. A Conversation. A Time of Grace."',
             description: "Join us for a special time of fellowship, inspiration, reflection and spiritual enrichment.",
-            date: "Saturday, October 24, 2026",
-            time: "5:00 PM GMT",
-            venue: "Grace Chapel Main Auditorium",
-            location: "Airport Residential Area, Accra",
             bgImage: "https://images.unsplash.com/photo-1510563800743-aed236490d08?auto=format&fit=crop&w=1600&q=80"
         };
 
@@ -675,10 +625,6 @@ USING (true);
             document.getElementById('event-speaker').innerText = EVENT_CONFIG.speakerName;
             document.getElementById('event-tagline').innerText = EVENT_CONFIG.tagline;
             document.getElementById('event-description').innerText = EVENT_CONFIG.description;
-            document.getElementById('event-date').innerText = EVENT_CONFIG.date;
-            document.getElementById('event-time').innerText = EVENT_CONFIG.time;
-            document.getElementById('event-venue').innerText = EVENT_CONFIG.venue;
-            document.getElementById('event-location').innerText = EVENT_CONFIG.location;
             
             const bgImgEl = document.getElementById('bg-image');
             bgImgEl.src = EVENT_CONFIG.bgImage;
@@ -686,6 +632,171 @@ USING (true);
                 // Fallback image if unsplash load is blocked
                 bgImgEl.src = "https://images.unsplash.com/photo-1438232992991-995b7058bbb3?auto=format&fit=crop&w=1600&q=80";
             };
+        }
+
+        /**
+         * Handle registration form submission to Supabase
+         */
+        async function handleFormSubmit(e) {
+            e.preventDefault();
+            hideFormErrors();
+
+            const fullName = document.getElementById('full_name').value.trim();
+            const email = document.getElementById('email').value.trim().toLowerCase();
+            const phone = document.getElementById('phone').value.trim();
+            const churchOrg = document.getElementById('church_organization').value.trim();
+            const attendees = parseInt(document.getElementById('attendees').value) || 1;
+            const message = document.getElementById('message').value.trim();
+            const updatesConsent = document.getElementById('updates_consent').checked;
+
+            // Form validation
+            let isValid = true;
+            if (!fullName) { showFieldError('full_name'); isValid = false; }
+            if (!email || !validateEmail(email)) { showFieldError('email'); isValid = false; }
+            if (!phone) { showFieldError('phone'); isValid = false; }
+            if (attendees < 1) { showFieldError('attendees'); isValid = false; }
+
+            if (!isValid) return;
+
+            // Set loading state
+            const submitBtn = document.getElementById('submit-btn');
+            const btnText = document.getElementById('btn-text');
+            const btnSpinner = document.getElementById('btn-spinner');
+            submitBtn.disabled = true;
+            btnText.innerText = 'PROCESSING...';
+            btnSpinner.classList.remove('hidden');
+
+            try {
+                const refCode = generateReferenceCode();
+                const payload = {
+                    full_name: fullName,
+                    email: email,
+                    phone: phone,
+                    church_organization: churchOrg || null,
+                    attendees: attendees,
+                    message: message || null,
+                    updates_consent: updatesConsent,
+                    registration_reference: refCode,
+                    status: 'registered'
+                };
+
+                if (supabaseClient) {
+                    // Check if email already registered in Supabase
+                    const { data: existing } = await supabaseClient
+                        .from('registrations')
+                        .select('id')
+                        .eq('email', email)
+                        .maybeSingle();
+
+                    if (existing) {
+                        showGeneralError("This email address has already been registered for the event.");
+                        resetSubmitButton();
+                        return;
+                    }
+
+                    // Insert record into Supabase
+                    const { error } = await supabaseClient
+                        .from('registrations')
+                        .insert([payload]);
+
+                    if (error) {
+                        console.error('Supabase insert error:', error);
+                        if (error.code === '23505' || error.message.includes('unique') || error.message.includes('already exists')) {
+                            showGeneralError("This email address has already been registered for the event.");
+                        } else {
+                            showGeneralError("Something went wrong. Please check your details and try again.");
+                        }
+                        resetSubmitButton();
+                        return;
+                    }
+                } else {
+                    // Fallback to local storage demo mode if credentials are not configured yet
+                    let demoDb = JSON.parse(localStorage.getItem('TWJGT_DEMO_DB') || '[]');
+                    if (demoDb.some(r => r.email === email)) {
+                        showGeneralError("This email address has already been registered for the event.");
+                        resetSubmitButton();
+                        return;
+                    }
+                    payload.created_at = new Date().toISOString();
+                    payload.id = crypto.randomUUID ? crypto.randomUUID() : 'demo-' + Date.now();
+                    demoDb.push(payload);
+                    localStorage.setItem('TWJGT_DEMO_DB', JSON.stringify(demoDb));
+                }
+
+                // Render success screen
+                document.getElementById('display-ref-code').innerText = refCode;
+                document.getElementById('summary-name').innerText = fullName;
+                document.getElementById('summary-email').innerText = email;
+                document.getElementById('summary-attendees').innerText = attendees;
+
+                document.getElementById('form-container').classList.add('hidden');
+                document.getElementById('success-container').classList.remove('hidden');
+
+                fetchRegistrationStats();
+
+            } catch (err) {
+                console.error('Submission error:', err);
+                showGeneralError("Something went wrong. Please check your details and try again.");
+            } finally {
+                resetSubmitButton();
+            }
+        }
+
+        /**
+         * Helper functions for form UI state and validation
+         */
+        function validateEmail(email) {
+            return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+        }
+
+        function showFieldError(fieldId) {
+            const field = document.getElementById(fieldId);
+            if (!field) return;
+            field.classList.add('border-red-500');
+            const errSpan = field.parentElement.querySelector('.field-error') || field.parentElement.parentElement.querySelector('.field-error');
+            if (errSpan) errSpan.classList.remove('hidden');
+        }
+
+        function hideFormErrors() {
+            document.getElementById('error-alert').classList.add('hidden');
+            document.querySelectorAll('.field-error').forEach(el => el.classList.add('hidden'));
+            document.querySelectorAll('input, textarea').forEach(el => el.classList.remove('border-red-500'));
+        }
+
+        function showGeneralError(msg) {
+            const alertEl = document.getElementById('error-alert');
+            const msgEl = document.getElementById('error-message');
+            msgEl.innerText = msg;
+            alertEl.classList.remove('hidden');
+        }
+
+        function resetSubmitButton() {
+            const submitBtn = document.getElementById('submit-btn');
+            const btnText = document.getElementById('btn-text');
+            const btnSpinner = document.getElementById('btn-spinner');
+            submitBtn.disabled = false;
+            btnText.innerText = 'REGISTER NOW';
+            btnSpinner.classList.add('hidden');
+        }
+
+        function adjustAttendees(delta) {
+            const input = document.getElementById('attendees');
+            let val = parseInt(input.value) || 1;
+            val = Math.max(1, Math.min(20, val + delta));
+            input.value = val;
+        }
+
+        function generateReferenceCode() {
+            const rand = Math.floor(1000 + Math.random() * 9000);
+            return `TWJGT-2026-${rand}`;
+        }
+
+        function resetRegistrationForm() {
+            document.getElementById('registration-form').reset();
+            document.getElementById('attendees').value = '1';
+            hideFormErrors();
+            document.getElementById('success-container').classList.add('hidden');
+            document.getElementById('form-container').classList.remove('hidden');
         }
 
         /**
