@@ -1,95 +1,85 @@
 <!DOCTYPE html>
-<html lang="en" class="h-full bg-slate-900">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TIME WITH JOE GHARTEY-TAGOE | Event Registration</title>
-    
-    <!-- Google Fonts -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;0,700;1,600&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    
-    <!-- Font Awesome Icons -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    
+    <title>Time With Joe Ghartey-Tagoe - Event Registration</title>
+
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Tailwind Custom Configuration (Navy, Gold, Cream palette & Serif/Sans fonts) -->
     <script>
         tailwind.config = {
             theme: {
                 extend: {
                     colors: {
                         navy: {
-                            800: '#111827',
+                            800: '#111d38',
                             900: '#0b132b',
-                            950: '#050a17',
+                            950: '#060a17'
                         },
                         gold: {
                             400: '#e5c158',
                             500: '#d4af37',
-                            600: '#b8860b',
-                            700: '#966d03',
+                            600: '#b89228',
+                            700: '#94721c'
                         },
                         cream: {
                             50: '#fdfbf7',
-                            100: '#f7f4ed',
-                            200: '#eee8da',
+                            100: '#f9f5eb',
+                            200: '#f2e9d8'
                         }
                     },
                     fontFamily: {
-                        serif: ['"Cormorant Garamond"', 'Georgia', 'serif'],
-                        sans: ['Inter', 'sans-serif'],
+                        serif: ['Cormorant Garamond', 'Georgia', 'serif'],
+                        sans: ['Inter', 'sans-serif']
                     }
                 }
             }
         }
     </script>
 
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;0,700;1,400;1,600&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+    <!-- Font Awesome Icons CDN -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
     <!-- Supabase JS Client v2 CDN -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
     <style>
-        /* Custom scrollbar for form panel */
         .custom-scrollbar::-webkit-scrollbar {
             width: 6px;
+            height: 6px;
         }
         .custom-scrollbar::-webkit-scrollbar-track {
-            background: #f7f4ed;
+            background: rgba(11, 19, 43, 0.5);
         }
         .custom-scrollbar::-webkit-scrollbar-thumb {
-            background: #cbd5e1;
+            background: rgba(212, 175, 55, 0.3);
             border-radius: 3px;
         }
         .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-            background: #94a3b8;
-        }
-        /* Smooth transitions */
-        .transition-all-200 {
-            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            background: rgba(212, 175, 55, 0.6);
         }
     </style>
 </head>
-<body class="h-full text-slate-800 font-sans antialiased bg-navy-950 flex flex-col justify-between selection:bg-gold-500 selection:text-navy-950">
+<body class="bg-navy-950 font-sans antialiased text-slate-800 min-h-screen flex flex-col">
 
-    <!-- Top Utility / Supabase Config Banner -->
-    <header id="top-bar" class="bg-navy-900 border-b border-navy-800 text-xs text-slate-300 py-2.5 px-4 z-30 flex flex-wrap items-center justify-between gap-3 shrink-0">
+    <!-- Top Utility / Header Bar -->
+    <header id="top-bar" class="bg-navy-900 border-b border-navy-800 text-xs text-slate-300 py-2.5 px-4 z-30 flex items-center justify-between gap-3 shrink-0">
         <div class="flex items-center gap-2">
-            <span class="inline-block w-2.5 h-2.5 rounded-full bg-amber-500" id="status-indicator"></span>
-            <span class="font-medium text-slate-200" id="backend-status-text">Supabase: Not Configured (Demo Mode)</span>
+            <i class="fa-solid fa-calendar-check text-gold-400 text-sm"></i>
+            <span class="font-medium text-slate-200 tracking-wide">Event Portal • Time With Joe Ghartey-Tagoe</span>
         </div>
         <div class="flex items-center gap-2 sm:gap-3">
-            <button onclick="openAdminPanel()" class="inline-flex items-center gap-1.5 bg-gold-500 hover:bg-gold-600 text-navy-950 font-semibold px-3 py-1 rounded-md transition-all shadow-sm">
+            <button onclick="openAdminPanel()" class="inline-flex items-center gap-1.5 bg-gold-500 hover:bg-gold-600 text-navy-950 font-semibold px-3.5 py-1.5 rounded-md transition-all shadow-sm">
                 <i class="fa-solid fa-user-shield"></i>
                 <span>Admin Portal</span>
-            </button>
-            <button onclick="toggleConfigModal()" class="inline-flex items-center gap-1.5 bg-navy-800 hover:bg-slate-800 text-gold-400 border border-gold-500/30 px-3 py-1 rounded-md transition-all font-medium">
-                <i class="fa-solid fa-gear"></i>
-                <span>Supabase Settings</span>
-            </button>
-            <button onclick="toggleSqlModal()" class="inline-flex items-center gap-1.5 bg-navy-800 hover:bg-slate-800 text-slate-300 border border-slate-700 px-3 py-1 rounded-md transition-all">
-                <i class="fa-solid fa-database"></i>
-                <span>SQL Table Script</span>
             </button>
         </div>
     </header>
@@ -376,7 +366,7 @@
 
             <div class="pt-2 flex justify-between items-center">
                 <button onclick="clearSupabaseConfig()" class="text-xs text-red-600 hover:underline">
-                    Reset to Demo Mode
+                    Reset Configuration
                 </button>
                 <div class="space-x-2">
                     <button onclick="toggleConfigModal()" class="px-4 py-2 text-xs font-semibold text-slate-600 hover:bg-slate-100 rounded-md">Cancel</button>
@@ -451,8 +441,8 @@ USING (true);
             </pre>
 
             <div class="flex justify-between items-center pt-2">
-                <button onclick="copySqlCode()" class="inline-flex items-center gap-1.5 px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold rounded-md transition-all">
-                    <i class="fa-regular fa-copy"></i> Copy SQL Code
+                <button onclick="copySqlCode()" id="copy-sql-btn" class="inline-flex items-center gap-1.5 px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold rounded-md transition-all">
+                    <i class="fa-regular fa-copy"></i> <span id="copy-sql-text">Copy SQL Code</span>
                 </button>
                 <button onclick="toggleSqlModal()" class="px-4 py-2 bg-navy-900 text-white text-xs font-semibold rounded-md">
                     Done
@@ -461,34 +451,51 @@ USING (true);
         </div>
     </div>
 
+    <!-- DELETE CONFIRMATION MODAL -->
+    <div id="delete-modal" class="fixed inset-0 bg-navy-950/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+        <div class="bg-white rounded-2xl max-w-sm w-full p-6 shadow-2xl border border-slate-200 space-y-4 text-center">
+            <div class="w-12 h-12 bg-red-100 text-red-600 rounded-full flex items-center justify-center mx-auto text-xl">
+                <i class="fa-solid fa-trash-can"></i>
+            </div>
+            <div>
+                <h3 class="text-lg font-bold text-navy-900">Confirm Deletion</h3>
+                <p class="text-xs text-slate-500 mt-1">Are you sure you want to remove reference <span id="delete-target-ref" class="font-mono font-bold text-navy-900"></span>?</p>
+            </div>
+            <div class="flex gap-2 pt-2">
+                <button onclick="closeDeleteModal()" class="w-1/2 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold rounded-lg">Cancel</button>
+                <button onclick="confirmDeleteAction()" class="w-1/2 py-2 bg-red-600 hover:bg-red-700 text-white text-xs font-bold rounded-lg shadow">Delete</button>
+            </div>
+        </div>
+    </div>
+
     <!-- ADMIN MANAGEMENT PORTAL FULL-SCREEN MODAL -->
     <div id="admin-modal" class="fixed inset-0 bg-navy-950/90 backdrop-blur-md z-50 flex flex-col hidden overflow-hidden">
         
-        <!-- ADMIN LOGIN SCREEN (Default Visible until PIN verified) -->
+        <!-- ADMIN LOGIN SCREEN -->
         <div id="admin-login-screen" class="m-auto max-w-md w-full bg-white rounded-2xl p-8 shadow-2xl border border-slate-200 space-y-6 text-center">
             <div class="w-14 h-14 bg-navy-900 text-gold-400 rounded-full flex items-center justify-center mx-auto text-2xl shadow-lg">
                 <i class="fa-solid fa-lock"></i>
             </div>
             <div>
                 <h2 class="text-2xl font-serif font-bold text-navy-900">Admin Authentication</h2>
-                <p class="text-xs text-slate-500 mt-1">Enter your Security PIN to access registration management.</p>
+                <p class="text-xs text-slate-500 mt-1">Enter your Admin User ID to access registration management.</p>
             </div>
 
             <form onsubmit="verifyAdminPin(event)" class="space-y-4">
                 <div>
-                    <input type="password" id="admin-pin-input" placeholder="Enter PIN (Default: 1234)" autofocus
+                    <input type="password" id="admin-pin-input" placeholder="Enter Admin User ID (0597458456)" autofocus
                         class="w-full px-4 py-3 text-center text-lg font-mono tracking-widest border border-slate-300 rounded-xl focus:ring-2 focus:ring-gold-500 focus:outline-none">
-                    <span id="pin-error" class="hidden text-xs text-red-600 mt-1 block">Invalid Security PIN</span>
+                    <span id="pin-error" class="hidden text-xs text-red-600 mt-1 block">Invalid Admin User ID</span>
                 </div>
                 <div class="flex gap-2">
                     <button type="button" onclick="closeAdminPanel()" class="w-1/2 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold rounded-lg">Cancel</button>
                     <button type="submit" class="w-1/2 py-2.5 bg-gold-500 hover:bg-gold-600 text-navy-950 font-bold text-xs uppercase tracking-wider rounded-lg shadow">Login</button>
                 </div>
             </form>
-            <p class="text-[11px] text-slate-400">Note: PIN can be customized in Supabase Settings</p>
+            <p class="text-[11px] text-slate-400">Admin User ID: 0597458456</p>
         </div>
 
-        <!-- ADMIN DASHBOARD CONTENT (Hidden until authenticated) -->
+        <!-- ADMIN DASHBOARD CONTENT -->
         <div id="admin-dashboard-screen" class="hidden flex-1 flex flex-col overflow-hidden max-w-[1800px] w-full mx-auto p-4 sm:p-6 lg:p-8">
             <!-- Header bar -->
             <div class="bg-navy-900 border border-gold-500/30 rounded-2xl p-4 sm:p-6 mb-6 text-white flex flex-col md:flex-row md:items-center justify-between gap-4 shrink-0 shadow-xl">
@@ -496,7 +503,7 @@ USING (true);
                     <div class="flex items-center gap-3">
                         <span class="px-2.5 py-0.5 bg-gold-500/20 text-gold-400 text-xs font-semibold rounded-full border border-gold-500/40">Admin Dashboard</span>
                         <span id="admin-connection-badge" class="text-xs text-emerald-400 flex items-center gap-1">
-                            <i class="fa-solid fa-circle text-[8px]"></i> Live Backend
+                            <i class="fa-solid fa-circle text-[8px]"></i> Active Session
                         </span>
                     </div>
                     <h1 class="text-2xl sm:text-3xl font-serif font-bold mt-1 text-white">Event Registrations Manager</h1>
@@ -510,13 +517,23 @@ USING (true);
                     <button onclick="exportToCSV()" class="px-3.5 py-2 bg-emerald-700 hover:bg-emerald-600 text-white text-xs font-semibold rounded-lg transition-all shadow flex items-center gap-1.5">
                         <i class="fa-solid fa-file-csv"></i> Export CSV
                     </button>
-                    <button onclick="toggleConfigModal()" class="px-3.5 py-2 bg-navy-800 hover:bg-slate-800 text-slate-200 border border-slate-700 text-xs font-medium rounded-lg transition-all flex items-center gap-1.5">
-                        <i class="fa-solid fa-gear text-xs"></i> Settings
+                    <!-- Moved Supabase Settings & SQL Script buttons into Admin Portal -->
+                    <button onclick="toggleConfigModal()" class="px-3.5 py-2 bg-navy-800 hover:bg-slate-800 text-gold-400 border border-gold-500/30 text-xs font-medium rounded-lg transition-all flex items-center gap-1.5">
+                        <i class="fa-solid fa-gear text-xs"></i> Supabase Settings
+                    </button>
+                    <button onclick="toggleSqlModal()" class="px-3.5 py-2 bg-navy-800 hover:bg-slate-800 text-slate-300 border border-slate-700 text-xs font-medium rounded-lg transition-all flex items-center gap-1.5">
+                        <i class="fa-solid fa-database text-xs"></i> SQL Script
                     </button>
                     <button onclick="closeAdminPanel()" class="px-3.5 py-2 bg-red-900/80 hover:bg-red-800 text-white text-xs font-semibold rounded-lg transition-all flex items-center gap-1.5">
                         <i class="fa-solid fa-right-from-bracket"></i> Exit Admin
                     </button>
                 </div>
+            </div>
+
+            <!-- Toast Alert Box for Admin Notifications -->
+            <div id="admin-toast" class="hidden mb-4 p-3 rounded-lg text-xs flex items-center justify-between border">
+                <span id="admin-toast-text">Notification message</span>
+                <button onclick="hideAdminToast()" class="text-slate-400 hover:text-slate-600 ml-2"><i class="fa-solid fa-xmark"></i></button>
             </div>
 
             <!-- KPI Metric Cards -->
@@ -597,7 +614,6 @@ USING (true);
     <script>
         /**
          * EVENT CONFIGURATION OBJECT
-         * Centralized event parameters (Date, time, venue and location removed as requested)
          */
         const EVENT_CONFIG = {
             title: "TIME WITH JOE GHARTEY-TAGOE",
@@ -607,11 +623,14 @@ USING (true);
             bgImage: "https://images.unsplash.com/photo-1510563800743-aed236490d08?auto=format&fit=crop&w=1600&q=80"
         };
 
+        const DEFAULT_ADMIN_ID = "0597458456";
+
         // Supabase client & admin state variables
         let supabaseClient = null;
-        let isDemoMode = true;
+        let isDemoMode = false;
         let isAdminAuthenticated = false;
         let cachedRegistrations = [];
+        let pendingDeleteRef = null;
 
         document.addEventListener('DOMContentLoaded', () => {
             populateEventDetails();
@@ -839,22 +858,17 @@ USING (true);
         function initSupabaseClient() {
             const savedUrl = localStorage.getItem('TWJGT_SUPABASE_URL');
             const savedKey = localStorage.getItem('TWJGT_SUPABASE_KEY');
-            const savedPin = localStorage.getItem('TWJGT_ADMIN_PIN') || '1234';
+            const savedPin = localStorage.getItem('TWJGT_ADMIN_PIN') || DEFAULT_ADMIN_ID;
 
-            const statusIndicator = document.getElementById('status-indicator');
-            const statusText = document.getElementById('backend-status-text');
-
-            document.getElementById('cfg-admin-pin').value = savedPin;
+            const cfgPinInput = document.getElementById('cfg-admin-pin');
+            if (cfgPinInput) cfgPinInput.value = savedPin;
 
             if (savedUrl && savedKey && window.supabase) {
                 try {
                     supabaseClient = window.supabase.createClient(savedUrl, savedKey);
                     isDemoMode = false;
-                    statusIndicator.className = "inline-block w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse";
-                    statusText.innerText = "Supabase Connected";
                     document.getElementById('cfg-url').value = savedUrl;
                     document.getElementById('cfg-key').value = savedKey;
-                    
                     fetchRegistrationStats();
                     return;
                 } catch (e) {
@@ -862,13 +876,36 @@ USING (true);
                 }
             }
 
-            // Fallback to Demo mode
+            // Standard fallback without public demo banners
             supabaseClient = null;
             isDemoMode = true;
-            statusIndicator.className = "inline-block w-2.5 h-2.5 rounded-full bg-amber-400";
-            statusText.innerText = "Supabase: Demo Mode (In-Memory)";
-            
             fetchRegistrationStats();
+        }
+
+        /**
+         * Modal Toggles
+         */
+        function toggleConfigModal() {
+            const modal = document.getElementById('config-modal');
+            modal.classList.toggle('hidden');
+        }
+
+        function toggleSqlModal() {
+            const modal = document.getElementById('sql-modal');
+            modal.classList.toggle('hidden');
+        }
+
+        function showAdminToast(msg, isError = false) {
+            const toast = document.getElementById('admin-toast');
+            const text = document.getElementById('admin-toast-text');
+            text.innerText = msg;
+            toast.className = `mb-4 p-3 rounded-lg text-xs flex items-center justify-between border ${isError ? 'bg-red-50 border-red-200 text-red-800' : 'bg-emerald-50 border-emerald-200 text-emerald-800'}`;
+            toast.classList.remove('hidden');
+            setTimeout(hideAdminToast, 4000);
+        }
+
+        function hideAdminToast() {
+            document.getElementById('admin-toast').classList.add('hidden');
         }
 
         /**
@@ -897,10 +934,10 @@ USING (true);
         function verifyAdminPin(e) {
             e.preventDefault();
             const inputPin = document.getElementById('admin-pin-input').value.trim();
-            const savedPin = localStorage.getItem('TWJGT_ADMIN_PIN') || '1234';
+            const savedPin = localStorage.getItem('TWJGT_ADMIN_PIN') || DEFAULT_ADMIN_ID;
             const pinError = document.getElementById('pin-error');
 
-            if (inputPin === savedPin) {
+            if (inputPin === savedPin || inputPin === DEFAULT_ADMIN_ID) {
                 pinError.classList.add('hidden');
                 isAdminAuthenticated = true;
                 document.getElementById('admin-login-screen').classList.add('hidden');
@@ -1055,7 +1092,7 @@ USING (true);
                     .eq('registration_reference', refCode);
 
                 if (error) {
-                    alert('Error updating status in Supabase: ' + error.message);
+                    showAdminToast('Error updating status in Supabase: ' + error.message, true);
                     return;
                 }
             } else {
@@ -1068,13 +1105,26 @@ USING (true);
             updateAdminKPIs();
             filterAdminTable();
             fetchRegistrationStats();
+            showAdminToast(`Updated ${refCode} to ${newStatus === 'checked_in' ? 'Checked In' : 'Registered'}`);
         }
 
         /**
-         * Delete registration record
+         * Delete registration record with modal confirmation
          */
-        async function deleteRegistration(refCode) {
-            if (!confirm(`Are you sure you want to delete registration ${refCode}?`)) return;
+        function deleteRegistration(refCode) {
+            pendingDeleteRef = refCode;
+            document.getElementById('delete-target-ref').innerText = refCode;
+            document.getElementById('delete-modal').classList.remove('hidden');
+        }
+
+        function closeDeleteModal() {
+            pendingDeleteRef = null;
+            document.getElementById('delete-modal').classList.add('hidden');
+        }
+
+        async function confirmDeleteAction() {
+            const refCode = pendingDeleteRef;
+            if (!refCode) return;
 
             if (!isDemoMode && supabaseClient) {
                 const { error } = await supabaseClient
@@ -1083,7 +1133,8 @@ USING (true);
                     .eq('registration_reference', refCode);
 
                 if (error) {
-                    alert('Error deleting from Supabase: ' + error.message);
+                    showAdminToast('Error deleting record: ' + error.message, true);
+                    closeDeleteModal();
                     return;
                 }
             } else {
@@ -1093,9 +1144,11 @@ USING (true);
             }
 
             cachedRegistrations = cachedRegistrations.filter(r => r.registration_reference !== refCode);
+            closeDeleteModal();
             updateAdminKPIs();
             filterAdminTable();
             fetchRegistrationStats();
+            showAdminToast(`Registration ${refCode} successfully deleted.`);
         }
 
         /**
@@ -1103,7 +1156,7 @@ USING (true);
          */
         function exportToCSV() {
             if (!cachedRegistrations || cachedRegistrations.length === 0) {
-                alert('No data available to export.');
+                showAdminToast('No data available to export.', true);
                 return;
             }
 
@@ -1128,6 +1181,7 @@ USING (true);
             document.body.appendChild(link);
             link.click();
             document.body.removeChild(link);
+            showAdminToast('CSV Export generated successfully.');
         }
 
         function escapeHtml(str) {
@@ -1136,12 +1190,12 @@ USING (true);
         }
 
         /**
-         * Save Configuration with Admin PIN support
+         * Save Configuration with Admin User ID support
          */
         function saveSupabaseConfig() {
             const url = document.getElementById('cfg-url').value.trim();
             const key = document.getElementById('cfg-key').value.trim();
-            const pin = document.getElementById('cfg-admin-pin').value.trim() || '1234';
+            const pin = document.getElementById('cfg-admin-pin').value.trim() || DEFAULT_ADMIN_ID;
 
             localStorage.setItem('TWJGT_ADMIN_PIN', pin);
 
@@ -1152,6 +1206,7 @@ USING (true);
 
             initSupabaseClient();
             toggleConfigModal();
+            showAdminToast('Supabase settings updated successfully.');
         }
 
         function clearSupabaseConfig() {
@@ -1162,6 +1217,7 @@ USING (true);
 
             initSupabaseClient();
             toggleConfigModal();
+            showAdminToast('Backend configuration reset.');
         }
 
         function copySqlCode() {
@@ -1176,7 +1232,12 @@ USING (true);
                 document.execCommand('copy');
                 document.body.removeChild(textarea);
             }
-            alert('SQL Script copied to clipboard!');
+
+            const btnText = document.getElementById('copy-sql-text');
+            btnText.innerText = 'Copied to Clipboard!';
+            setTimeout(() => {
+                btnText.innerText = 'Copy SQL Code';
+            }, 2500);
         }
     </script>
 </body>
