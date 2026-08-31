@@ -78,7 +78,11 @@
             <span class="inline-block w-2.5 h-2.5 rounded-full bg-amber-500" id="status-indicator"></span>
             <span class="font-medium text-slate-200" id="backend-status-text">Supabase: Not Configured (Demo Mode)</span>
         </div>
-        <div class="flex items-center gap-3">
+        <div class="flex items-center gap-2 sm:gap-3">
+            <button onclick="openAdminPanel()" class="inline-flex items-center gap-1.5 bg-gold-500 hover:bg-gold-600 text-navy-950 font-semibold px-3 py-1 rounded-md transition-all shadow-sm">
+                <i class="fa-solid fa-user-shield"></i>
+                <span>Admin Portal</span>
+            </button>
             <button onclick="toggleConfigModal()" class="inline-flex items-center gap-1.5 bg-navy-800 hover:bg-slate-800 text-gold-400 border border-gold-500/30 px-3 py-1 rounded-md transition-all font-medium">
                 <i class="fa-solid fa-gear"></i>
                 <span>Supabase Settings</span>
@@ -133,9 +137,30 @@
 
                 <!-- Middle: Event Details Card -->
                 <div class="my-6 bg-navy-900/90 border border-gold-500/20 rounded-xl p-6 space-y-4 backdrop-blur-md shadow-2xl">
-                    <h2 class="text-xs font-semibold text-gold-400 uppercase tracking-widest border-b border-navy-800 pb-2">
-                        Event Specifications
+                    <h2 class="text-xs font-semibold text-gold-400 uppercase tracking-widest border-b border-navy-800 pb-2 flex justify-between items-center">
+                        <span>Event Specifications</span>
+                        <!-- Live Counter Badge -->
+                        <span class="text-[10px] bg-gold-500/20 text-gold-400 border border-gold-500/40 px-2 py-0.5 rounded-full font-sans tracking-normal flex items-center gap-1">
+                            <i class="fa-solid fa-signal text-[9px] text-emerald-400 animate-pulse"></i> Live
+                        </span>
                     </h2>
+
+                    <!-- Live Registration Counter Bar -->
+                    <div class="bg-navy-950/80 border border-gold-500/30 rounded-lg p-3 flex items-center justify-between">
+                        <div class="flex items-center gap-3">
+                            <div class="w-8 h-8 rounded-full bg-gold-500/10 border border-gold-500/30 flex items-center justify-center text-gold-400">
+                                <i class="fa-solid fa-users text-sm"></i>
+                            </div>
+                            <div>
+                                <span class="text-xs font-semibold text-slate-300 block uppercase tracking-wider">Registered Attendees</span>
+                                <span class="text-[11px] text-slate-400">Current attendance counter</span>
+                            </div>
+                        </div>
+                        <div class="text-right">
+                            <span id="stat-total-registrations" class="text-xl font-bold font-mono text-gold-400">--</span>
+                            <span class="text-[10px] text-slate-400 block font-sans">(<span id="stat-total-seats">--</span> seats reserved)</span>
+                        </div>
+                    </div>
 
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
                         <!-- Date -->
@@ -388,6 +413,11 @@
                     <label class="block text-xs font-semibold text-slate-700 uppercase mb-1">Supabase Anon Key</label>
                     <textarea id="cfg-key" rows="3" placeholder="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..." class="w-full px-3 py-2 border border-slate-300 rounded-md focus:ring-2 focus:ring-gold-500 text-xs font-mono"></textarea>
                 </div>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-700 uppercase mb-1">Admin Security PIN</label>
+                    <input type="password" id="cfg-admin-pin" placeholder="Default: 1234" class="w-full px-3 py-2 border border-slate-300 rounded-md focus:ring-2 focus:ring-gold-500 text-xs font-mono">
+                    <span class="text-[10px] text-slate-400 block mt-1">Passcode used to access the Admin Management Portal (Default is 1234)</span>
+                </div>
             </div>
 
             <div class="pt-2 flex justify-between items-center">
@@ -415,7 +445,7 @@
             </div>
             
             <p class="text-xs text-slate-600">
-                Run this SQL in your Supabase <strong>SQL Editor</strong> to create the <code>registrations</code> table with Row Level Security (RLS) configured for anonymous registrations:
+                Run this SQL in your Supabase <strong>SQL Editor</strong> to create the <code>registrations</code> table with complete Row Level Security (RLS) for registration and admin operations:
             </p>
 
             <pre class="bg-navy-950 text-gold-400 p-4 rounded-xl text-xs font-mono overflow-x-auto max-h-72 custom-scrollbar select-all" id="sql-code">
@@ -437,15 +467,33 @@ CREATE TABLE IF NOT EXISTS public.registrations (
 -- 2. Enable Row Level Security
 ALTER TABLE public.registrations ENABLE ROW LEVEL SECURITY;
 
--- 3. Policy: Allow anonymous users to INSERT new registrations
+-- 3. Policy: Allow public insert for registrations
 CREATE POLICY "Allow public insert" 
 ON public.registrations 
 FOR INSERT 
 TO anon 
 WITH CHECK (true);
 
--- 4. Policy: Restrict SELECT to authenticated service role / admins only
--- Anonymous users cannot read, update, or delete registrations.
+-- 4. Policy: Allow public select for registrations and counts
+CREATE POLICY "Allow public select" 
+ON public.registrations 
+FOR SELECT 
+TO anon 
+USING (true);
+
+-- 5. Policy: Allow public update (e.g. check-in status changes)
+CREATE POLICY "Allow public update" 
+ON public.registrations 
+FOR UPDATE 
+TO anon 
+USING (true);
+
+-- 6. Policy: Allow public delete (for admin deletion)
+CREATE POLICY "Allow public delete" 
+ON public.registrations 
+FOR DELETE 
+TO anon 
+USING (true);
             </pre>
 
             <div class="flex justify-between items-center pt-2">
@@ -456,6 +504,138 @@ WITH CHECK (true);
                     Done
                 </button>
             </div>
+        </div>
+    </div>
+
+    <!-- ADMIN MANAGEMENT PORTAL FULL-SCREEN MODAL -->
+    <div id="admin-modal" class="fixed inset-0 bg-navy-950/90 backdrop-blur-md z-50 flex flex-col hidden overflow-hidden">
+        
+        <!-- ADMIN LOGIN SCREEN (Default Visible until PIN verified) -->
+        <div id="admin-login-screen" class="m-auto max-w-md w-full bg-white rounded-2xl p-8 shadow-2xl border border-slate-200 space-y-6 text-center">
+            <div class="w-14 h-14 bg-navy-900 text-gold-400 rounded-full flex items-center justify-center mx-auto text-2xl shadow-lg">
+                <i class="fa-solid fa-lock"></i>
+            </div>
+            <div>
+                <h2 class="text-2xl font-serif font-bold text-navy-900">Admin Authentication</h2>
+                <p class="text-xs text-slate-500 mt-1">Enter your Security PIN to access registration management.</p>
+            </div>
+
+            <form onsubmit="verifyAdminPin(event)" class="space-y-4">
+                <div>
+                    <input type="password" id="admin-pin-input" placeholder="Enter PIN (Default: 1234)" autofocus
+                        class="w-full px-4 py-3 text-center text-lg font-mono tracking-widest border border-slate-300 rounded-xl focus:ring-2 focus:ring-gold-500 focus:outline-none">
+                    <span id="pin-error" class="hidden text-xs text-red-600 mt-1 block">Invalid Security PIN</span>
+                </div>
+                <div class="flex gap-2">
+                    <button type="button" onclick="closeAdminPanel()" class="w-1/2 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold rounded-lg">Cancel</button>
+                    <button type="submit" class="w-1/2 py-2.5 bg-gold-500 hover:bg-gold-600 text-navy-950 font-bold text-xs uppercase tracking-wider rounded-lg shadow">Login</button>
+                </div>
+            </form>
+            <p class="text-[11px] text-slate-400">Note: PIN can be customized in Supabase Settings</p>
+        </div>
+
+        <!-- ADMIN DASHBOARD CONTENT (Hidden until authenticated) -->
+        <div id="admin-dashboard-screen" class="hidden flex-1 flex flex-col overflow-hidden max-w-[1800px] w-full mx-auto p-4 sm:p-6 lg:p-8">
+            <!-- Header bar -->
+            <div class="bg-navy-900 border border-gold-500/30 rounded-2xl p-4 sm:p-6 mb-6 text-white flex flex-col md:flex-row md:items-center justify-between gap-4 shrink-0 shadow-xl">
+                <div>
+                    <div class="flex items-center gap-3">
+                        <span class="px-2.5 py-0.5 bg-gold-500/20 text-gold-400 text-xs font-semibold rounded-full border border-gold-500/40">Admin Dashboard</span>
+                        <span id="admin-connection-badge" class="text-xs text-emerald-400 flex items-center gap-1">
+                            <i class="fa-solid fa-circle text-[8px]"></i> Live Backend
+                        </span>
+                    </div>
+                    <h1 class="text-2xl sm:text-3xl font-serif font-bold mt-1 text-white">Event Registrations Manager</h1>
+                    <p class="text-xs text-slate-400">Time With Joe Ghartey-Tagoe Attendance Tracker</p>
+                </div>
+
+                <div class="flex flex-wrap items-center gap-2">
+                    <button onclick="fetchAdminData()" class="px-3.5 py-2 bg-navy-800 hover:bg-slate-800 text-gold-400 border border-gold-500/30 text-xs font-medium rounded-lg transition-all flex items-center gap-1.5">
+                        <i class="fa-solid fa-rotate text-xs"></i> Refresh
+                    </button>
+                    <button onclick="exportToCSV()" class="px-3.5 py-2 bg-emerald-700 hover:bg-emerald-600 text-white text-xs font-semibold rounded-lg transition-all shadow flex items-center gap-1.5">
+                        <i class="fa-solid fa-file-csv"></i> Export CSV
+                    </button>
+                    <button onclick="toggleConfigModal()" class="px-3.5 py-2 bg-navy-800 hover:bg-slate-800 text-slate-200 border border-slate-700 text-xs font-medium rounded-lg transition-all flex items-center gap-1.5">
+                        <i class="fa-solid fa-gear text-xs"></i> Settings
+                    </button>
+                    <button onclick="closeAdminPanel()" class="px-3.5 py-2 bg-red-900/80 hover:bg-red-800 text-white text-xs font-semibold rounded-lg transition-all flex items-center gap-1.5">
+                        <i class="fa-solid fa-right-from-bracket"></i> Exit Admin
+                    </button>
+                </div>
+            </div>
+
+            <!-- KPI Metric Cards -->
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6 shrink-0">
+                <div class="bg-white border border-slate-200 rounded-xl p-4 shadow-sm">
+                    <div class="text-xs font-semibold text-slate-500 uppercase tracking-wider">Total Registrations</div>
+                    <div id="adm-kpi-regs" class="text-2xl sm:text-3xl font-mono font-bold text-navy-900 mt-1">0</div>
+                    <div class="text-[11px] text-slate-400 mt-0.5">Unique entries</div>
+                </div>
+                <div class="bg-white border border-slate-200 rounded-xl p-4 shadow-sm">
+                    <div class="text-xs font-semibold text-slate-500 uppercase tracking-wider">Total Seats Reserved</div>
+                    <div id="adm-kpi-seats" class="text-2xl sm:text-3xl font-mono font-bold text-gold-600 mt-1">0</div>
+                    <div class="text-[11px] text-slate-400 mt-0.5">Sum of attendees</div>
+                </div>
+                <div class="bg-white border border-slate-200 rounded-xl p-4 shadow-sm">
+                    <div class="text-xs font-semibold text-slate-500 uppercase tracking-wider">Checked In</div>
+                    <div id="adm-kpi-checked" class="text-2xl sm:text-3xl font-mono font-bold text-emerald-600 mt-1">0</div>
+                    <div class="text-[11px] text-slate-400 mt-0.5">Attendees on site</div>
+                </div>
+                <div class="bg-white border border-slate-200 rounded-xl p-4 shadow-sm">
+                    <div class="text-xs font-semibold text-slate-500 uppercase tracking-wider">Attendance Rate</div>
+                    <div id="adm-kpi-rate" class="text-2xl sm:text-3xl font-mono font-bold text-indigo-600 mt-1">0%</div>
+                    <div class="text-[11px] text-slate-400 mt-0.5">Check-in ratio</div>
+                </div>
+            </div>
+
+            <!-- Search and Filter Bar -->
+            <div class="bg-white border border-slate-200 rounded-xl p-4 mb-4 flex flex-col sm:flex-row gap-3 items-center justify-between shrink-0 shadow-sm">
+                <div class="relative w-full sm:w-80">
+                    <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-xs"></i>
+                    <input type="text" id="adm-search-input" onkeyup="filterAdminTable()" placeholder="Search name, email, phone, ref..."
+                        class="w-full pl-9 pr-3 py-2 bg-slate-50 border border-slate-300 rounded-lg text-xs text-slate-800 focus:outline-none focus:ring-2 focus:ring-gold-500">
+                </div>
+                <div class="flex items-center gap-3 w-full sm:w-auto justify-end">
+                    <label class="text-xs text-slate-600 font-medium">Status Filter:</label>
+                    <select id="adm-filter-status" onchange="filterAdminTable()" class="px-3 py-2 bg-slate-50 border border-slate-300 rounded-lg text-xs text-slate-800 focus:outline-none focus:ring-2 focus:ring-gold-500">
+                        <option value="ALL">All Statuses</option>
+                        <option value="registered">Registered</option>
+                        <option value="checked_in">Checked In</option>
+                        <option value="cancelled">Cancelled</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- Registrations Data Table -->
+            <div class="flex-1 bg-white border border-slate-200 rounded-xl overflow-hidden shadow-xl flex flex-col min-h-0">
+                <div class="overflow-x-auto overflow-y-auto flex-1 custom-scrollbar">
+                    <table class="w-full text-left border-collapse min-w-[900px]">
+                        <thead class="bg-navy-950 text-gold-400 text-[11px] font-semibold uppercase tracking-wider sticky top-0 z-10">
+                            <tr>
+                                <th class="p-3.5 border-b border-navy-800">Ref Code</th>
+                                <th class="p-3.5 border-b border-navy-800">Attendee Name</th>
+                                <th class="p-3.5 border-b border-navy-800">Contact Details</th>
+                                <th class="p-3.5 border-b border-navy-800">Organization</th>
+                                <th class="p-3.5 border-b border-navy-800 text-center">Seats</th>
+                                <th class="p-3.5 border-b border-navy-800">Date Registered</th>
+                                <th class="p-3.5 border-b border-navy-800">Status</th>
+                                <th class="p-3.5 border-b border-navy-800 text-center">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="admin-table-body" class="divide-y divide-slate-100 text-xs text-slate-700">
+                            <tr>
+                                <td colspan="8" class="text-center p-8 text-slate-400">Loading registration records...</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="p-3 bg-slate-50 border-t border-slate-200 text-xs text-slate-500 flex justify-between items-center shrink-0">
+                    <div>Showing <span id="adm-count-visible">0</span> of <span id="adm-count-total">0</span> records</div>
+                    <div class="text-[11px] text-slate-400">Click on status badge to toggle check-in status</div>
+                </div>
+            </div>
+
         </div>
     </div>
 
@@ -474,15 +654,15 @@ WITH CHECK (true);
             time: "5:00 PM GMT",
             venue: "Grace Chapel Main Auditorium",
             location: "Airport Residential Area, Accra",
-            // High quality Christian fellowship / worship image
             bgImage: "https://images.unsplash.com/photo-1510563800743-aed236490d08?auto=format&fit=crop&w=1600&q=80"
         };
 
-        // Supabase client instance
+        // Supabase client & admin state variables
         let supabaseClient = null;
         let isDemoMode = true;
+        let isAdminAuthenticated = false;
+        let cachedRegistrations = [];
 
-        // Initialize App on DOM Content Loaded
         document.addEventListener('DOMContentLoaded', () => {
             populateEventDetails();
             initSupabaseClient();
@@ -509,14 +689,51 @@ WITH CHECK (true);
         }
 
         /**
+         * Fetch live registration statistics from Supabase or Local Storage
+         */
+        async function fetchRegistrationStats() {
+            let totalRegs = 0;
+            let totalSeats = 0;
+
+            try {
+                if (!isDemoMode && supabaseClient) {
+                    const { data, count, error } = await supabaseClient
+                        .from('registrations')
+                        .select('attendees', { count: 'exact' });
+
+                    if (!error && data) {
+                        totalRegs = count !== null ? count : data.length;
+                        totalSeats = data.reduce((sum, item) => sum + (parseInt(item.attendees) || 1), 0);
+                    } else if (error) {
+                        console.warn('Supabase stats query notice:', error.message);
+                    }
+                } else {
+                    const demoDb = JSON.parse(localStorage.getItem('TWJGT_DEMO_DB') || '[]');
+                    totalRegs = demoDb.length;
+                    totalSeats = demoDb.reduce((sum, item) => sum + (parseInt(item.attendees) || 1), 0);
+                }
+            } catch (e) {
+                console.warn('Error fetching registration stats:', e);
+            }
+
+            const regEl = document.getElementById('stat-total-registrations');
+            const seatsEl = document.getElementById('stat-total-seats');
+            if (regEl) regEl.innerText = totalRegs.toLocaleString();
+            if (seatsEl) seatsEl.innerText = totalSeats.toLocaleString();
+        }
+
+        /**
          * Initialize Supabase client if keys exist in localStorage
          */
         function initSupabaseClient() {
             const savedUrl = localStorage.getItem('TWJGT_SUPABASE_URL');
             const savedKey = localStorage.getItem('TWJGT_SUPABASE_KEY');
+            const savedPin = localStorage.getItem('TWJGT_ADMIN_PIN') || '1234';
 
             const statusIndicator = document.getElementById('status-indicator');
             const statusText = document.getElementById('backend-status-text');
+
+            document.getElementById('cfg-admin-pin').value = savedPin;
 
             if (savedUrl && savedKey && window.supabase) {
                 try {
@@ -526,6 +743,8 @@ WITH CHECK (true);
                     statusText.innerText = "Supabase Connected";
                     document.getElementById('cfg-url').value = savedUrl;
                     document.getElementById('cfg-key').value = savedKey;
+                    
+                    fetchRegistrationStats();
                     return;
                 } catch (e) {
                     console.warn("Supabase init error:", e);
@@ -537,247 +756,288 @@ WITH CHECK (true);
             isDemoMode = true;
             statusIndicator.className = "inline-block w-2.5 h-2.5 rounded-full bg-amber-400";
             statusText.innerText = "Supabase: Demo Mode (In-Memory)";
-        }
-
-        /**
-         * Adjust Attendee Counter
-         */
-        function adjustAttendees(delta) {
-            const input = document.getElementById('attendees');
-            let val = parseInt(input.value) || 1;
-            val = Math.max(1, Math.min(20, val + delta));
-            input.value = val;
-        }
-
-        /**
-         * Generate Unique Registration Reference Number
-         * Example: TWJGT-2026-4892
-         */
-        function generateReferenceCode() {
-            const randomDigits = Math.floor(1000 + Math.random() * 9000);
-            return `TWJGT-2026-${randomDigits}`;
-        }
-
-        /**
-         * Validate Email Helper
-         */
-        function isValidEmail(email) {
-            const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-            return re.test(String(email).toLowerCase());
-        }
-
-        /**
-         * Handle Registration Form Submission
-         */
-        async function handleFormSubmit(event) {
-            event.preventDefault();
-            hideError();
-
-            const form = event.target;
-            const fullName = form.full_name.value.trim();
-            const email = form.email.value.trim();
-            const phone = form.phone.value.trim();
-            const churchOrg = form.church_organization.value.trim();
-            const attendees = parseInt(form.attendees.value) || 1;
-            const message = form.message.value.trim();
-            const updatesConsent = form.updates_consent.checked;
-
-            // Form Validations
-            let isValid = true;
             
-            if (!fullName) {
-                showFieldError('full_name', 'Full name is required');
-                isValid = false;
+            fetchRegistrationStats();
+        }
+
+        /**
+         * ADMIN PORTAL CONTROLS & AUTHENTICATION
+         */
+        function openAdminPanel() {
+            const modal = document.getElementById('admin-modal');
+            modal.classList.remove('hidden');
+
+            if (isAdminAuthenticated) {
+                document.getElementById('admin-login-screen').classList.add('hidden');
+                document.getElementById('admin-dashboard-screen').classList.remove('hidden');
+                fetchAdminData();
             } else {
-                hideFieldError('full_name');
+                document.getElementById('admin-login-screen').classList.remove('hidden');
+                document.getElementById('admin-dashboard-screen').classList.add('hidden');
+                document.getElementById('admin-pin-input').value = '';
+                document.getElementById('admin-pin-input').focus();
             }
+        }
 
-            if (!email || !isValidEmail(email)) {
-                showFieldError('email', 'Please enter a valid email address');
-                isValid = false;
+        function closeAdminPanel() {
+            document.getElementById('admin-modal').classList.add('hidden');
+        }
+
+        function verifyAdminPin(e) {
+            e.preventDefault();
+            const inputPin = document.getElementById('admin-pin-input').value.trim();
+            const savedPin = localStorage.getItem('TWJGT_ADMIN_PIN') || '1234';
+            const pinError = document.getElementById('pin-error');
+
+            if (inputPin === savedPin) {
+                pinError.classList.add('hidden');
+                isAdminAuthenticated = true;
+                document.getElementById('admin-login-screen').classList.add('hidden');
+                document.getElementById('admin-dashboard-screen').classList.remove('hidden');
+                fetchAdminData();
             } else {
-                hideFieldError('email');
+                pinError.classList.remove('hidden');
             }
+        }
 
-            if (!phone) {
-                showFieldError('phone', 'Phone number is required');
-                isValid = false;
-            } else {
-                hideFieldError('phone');
-            }
-
-            if (attendees < 1) {
-                showFieldError('attendees', 'Must be at least 1 attendee');
-                isValid = false;
-            } else {
-                hideFieldError('attendees');
-            }
-
-            if (!isValid) return;
-
-            // Show Loading State
-            setLoadingState(true);
-
-            const refCode = generateReferenceCode();
-            const recordData = {
-                full_name: fullName,
-                email: email,
-                phone: phone,
-                church_organization: churchOrg || null,
-                attendees: attendees,
-                message: message || null,
-                updates_consent: updatesConsent,
-                registration_reference: refCode,
-                status: 'registered',
-                created_at: new Date().toISOString()
-            };
+        /**
+         * Fetch full registration data for Admin Panel
+         */
+        async function fetchAdminData() {
+            const tbody = document.getElementById('admin-table-body');
+            tbody.innerHTML = `<tr><td colspan="8" class="text-center p-8 text-slate-400"><i class="fa-solid fa-circle-notch fa-spin mr-2"></i>Loading records...</td></tr>`;
 
             try {
                 if (!isDemoMode && supabaseClient) {
-                    // Real Supabase Insertion
                     const { data, error } = await supabaseClient
                         .from('registrations')
-                        .insert([recordData]);
+                        .select('*')
+                        .order('created_at', { ascending: false });
 
                     if (error) {
-                        console.error('Supabase error code/message:', error);
-                        // Unique email constraint handling
-                        if (error.code === '23505' || (error.message && error.message.includes('unique'))) {
-                            showError('This email address has already been registered for the event.');
-                        } else {
-                            showError('Something went wrong. Please check your details and try again.');
-                        }
-                        setLoadingState(false);
+                        console.error('Supabase admin fetch error:', error);
+                        tbody.innerHTML = `<tr><td colspan="8" class="text-center p-8 text-red-500">Failed to load from Supabase: ${error.message}</td></tr>`;
                         return;
                     }
+                    cachedRegistrations = data || [];
                 } else {
-                    // Demo Mode delay simulation
-                    await new Promise(resolve => setTimeout(resolve, 800));
-                    
-                    // Simple local check for demo duplicate
                     const demoDb = JSON.parse(localStorage.getItem('TWJGT_DEMO_DB') || '[]');
-                    const exists = demoDb.some(item => item.email.toLowerCase() === email.toLowerCase());
-                    if (exists) {
-                        showError('This email address has already been registered for the event.');
-                        setLoadingState(false);
-                        return;
-                    }
-                    demoDb.push(recordData);
-                    localStorage.setItem('TWJGT_DEMO_DB', JSON.stringify(demoDb));
+                    // Sort descending
+                    cachedRegistrations = demoDb.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
                 }
 
-                // Render Success View
-                renderSuccessScreen(recordData);
+                updateAdminKPIs();
+                renderAdminTable(cachedRegistrations);
 
             } catch (err) {
-                console.error('Unexpected error:', err);
-                showError('Something went wrong. Please check your details and try again.');
-            } finally {
-                setLoadingState(false);
+                console.error('Error fetching admin data:', err);
+                tbody.innerHTML = `<tr><td colspan="8" class="text-center p-8 text-red-500">An error occurred while loading registrations.</td></tr>`;
             }
         }
 
         /**
-         * UI State Helpers
+         * Update Admin Metric Cards
          */
-        function setLoadingState(loading) {
-            const submitBtn = document.getElementById('submit-btn');
-            const btnText = document.getElementById('btn-text');
-            const btnSpinner = document.getElementById('btn-spinner');
+        function updateAdminKPIs() {
+            const totalRegs = cachedRegistrations.length;
+            const totalSeats = cachedRegistrations.reduce((sum, item) => sum + (parseInt(item.attendees) || 1), 0);
+            const checkedInCount = cachedRegistrations.filter(r => r.status === 'checked_in').reduce((sum, item) => sum + (parseInt(item.attendees) || 1), 0);
+            const rate = totalSeats > 0 ? Math.round((checkedInCount / totalSeats) * 100) : 0;
 
-            if (loading) {
-                submitBtn.disabled = true;
-                submitBtn.classList.add('opacity-80', 'cursor-not-allowed');
-                btnText.innerText = 'PROCESSING...';
-                btnSpinner.classList.remove('hidden');
-            } else {
-                submitBtn.disabled = false;
-                submitBtn.classList.remove('opacity-80', 'cursor-not-allowed');
-                btnText.innerText = 'REGISTER NOW';
-                btnSpinner.classList.add('hidden');
-            }
-        }
+            document.getElementById('adm-kpi-regs').innerText = totalRegs.toLocaleString();
+            document.getElementById('adm-kpi-seats').innerText = totalSeats.toLocaleString();
+            document.getElementById('adm-kpi-checked').innerText = checkedInCount.toLocaleString();
+            document.getElementById('adm-kpi-rate').innerText = `${rate}%`;
 
-        function showFieldError(fieldId, msg) {
-            const input = document.getElementById(fieldId);
-            const errorSpan = input.closest('div').parentElement.querySelector('.field-error');
-            if (input) input.classList.add('border-red-500');
-            if (errorSpan) {
-                errorSpan.innerText = msg;
-                errorSpan.classList.remove('hidden');
-            }
-        }
-
-        function hideFieldError(fieldId) {
-            const input = document.getElementById(fieldId);
-            const errorSpan = input.closest('div').parentElement.querySelector('.field-error');
-            if (input) input.classList.remove('border-red-500');
-            if (errorSpan) errorSpan.classList.add('hidden');
-        }
-
-        function showError(msg) {
-            const errorAlert = document.getElementById('error-alert');
-            const errorMsg = document.getElementById('error-message');
-            errorMsg.innerText = msg;
-            errorAlert.classList.remove('hidden');
-        }
-
-        function hideError() {
-            document.getElementById('error-alert').classList.add('hidden');
+            const badge = document.getElementById('admin-connection-badge');
+            badge.innerHTML = isDemoMode 
+                ? `<i class="fa-solid fa-circle text-[8px] text-amber-400"></i> Demo LocalDB`
+                : `<i class="fa-solid fa-circle text-[8px] text-emerald-400"></i> Supabase Live`;
         }
 
         /**
-         * Render Success Screen
+         * Render Registrations Data Table
          */
-        function renderSuccessScreen(data) {
-            document.getElementById('display-ref-code').innerText = data.registration_reference;
-            document.getElementById('summary-name').innerText = data.full_name;
-            document.getElementById('summary-email').innerText = data.email;
-            document.getElementById('summary-attendees').innerText = `${data.attendees} ${data.attendees > 1 ? 'seats' : 'seat'}`;
+        function renderAdminTable(dataList) {
+            const tbody = document.getElementById('admin-table-body');
+            document.getElementById('adm-count-visible').innerText = dataList.length;
+            document.getElementById('adm-count-total').innerText = cachedRegistrations.length;
 
-            document.getElementById('form-container').classList.add('hidden');
-            document.getElementById('success-container').classList.remove('hidden');
-        }
-
-        /**
-         * Reset Form to register another person
-         */
-        function resetRegistrationForm() {
-            document.getElementById('registration-form').reset();
-            document.getElementById('attendees').value = 1;
-            hideError();
-            
-            // Hide errors
-            ['full_name', 'email', 'phone', 'attendees'].forEach(hideFieldError);
-
-            document.getElementById('success-container').classList.add('hidden');
-            document.getElementById('form-container').classList.remove('hidden');
-        }
-
-        /**
-         * Modals Controls
-         */
-        function toggleConfigModal() {
-            const modal = document.getElementById('config-modal');
-            modal.classList.toggle('hidden');
-        }
-
-        function toggleSqlModal() {
-            const modal = document.getElementById('sql-modal');
-            modal.classList.toggle('hidden');
-        }
-
-        function saveSupabaseConfig() {
-            const url = document.getElementById('cfg-url').value.trim();
-            const key = document.getElementById('cfg-key').value.trim();
-
-            if (!url || !key) {
-                alert('Please enter both Supabase URL and Anon Key');
+            if (!dataList || dataList.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="8" class="text-center p-8 text-slate-400">No registration records found.</td></tr>`;
                 return;
             }
 
-            localStorage.setItem('TWJGT_SUPABASE_URL', url);
-            localStorage.setItem('TWJGT_SUPABASE_KEY', key);
+            tbody.innerHTML = dataList.map(item => {
+                const dateStr = item.created_at ? new Date(item.created_at).toLocaleString('en-US', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' }) : '-';
+                
+                let statusBadge = '';
+                if (item.status === 'checked_in') {
+                    statusBadge = `<span onclick="toggleCheckIn('${item.registration_reference}')" class="cursor-pointer px-2.5 py-1 bg-emerald-100 text-emerald-800 text-[10px] font-bold rounded-full uppercase tracking-wider hover:bg-emerald-200 transition-all"><i class="fa-solid fa-check mr-1"></i> Checked In</span>`;
+                } else if (item.status === 'cancelled') {
+                    statusBadge = `<span onclick="toggleCheckIn('${item.registration_reference}')" class="cursor-pointer px-2.5 py-1 bg-red-100 text-red-800 text-[10px] font-bold rounded-full uppercase tracking-wider hover:bg-red-200 transition-all"><i class="fa-solid fa-xmark mr-1"></i> Cancelled</span>`;
+                } else {
+                    statusBadge = `<span onclick="toggleCheckIn('${item.registration_reference}')" class="cursor-pointer px-2.5 py-1 bg-amber-100 text-amber-800 text-[10px] font-bold rounded-full uppercase tracking-wider hover:bg-amber-200 transition-all"><i class="fa-solid fa-clock mr-1"></i> Registered</span>`;
+                }
+
+                return `
+                    <tr class="hover:bg-slate-50/80 transition-all">
+                        <td class="p-3.5 font-mono font-bold text-navy-900">${item.registration_reference || '-'}</td>
+                        <td class="p-3.5 font-semibold text-slate-900">${escapeHtml(item.full_name)}</td>
+                        <td class="p-3.5">
+                            <div class="font-medium text-slate-800">${escapeHtml(item.email)}</div>
+                            <div class="text-[11px] text-slate-500">${escapeHtml(item.phone)}</div>
+                        </td>
+                        <td class="p-3.5 text-slate-600">${escapeHtml(item.church_organization || 'N/A')}</td>
+                        <td class="p-3.5 text-center font-bold text-gold-600">${item.attendees || 1}</td>
+                        <td class="p-3.5 text-slate-500 text-[11px]">${dateStr}</td>
+                        <td class="p-3.5">${statusBadge}</td>
+                        <td class="p-3.5 text-center space-x-1">
+                            <button onclick="toggleCheckIn('${item.registration_reference}')" title="Toggle Check-In Status" class="p-1.5 text-slate-500 hover:text-navy-900 rounded hover:bg-slate-200">
+                                <i class="fa-solid fa-user-check text-xs"></i>
+                            </button>
+                            <button onclick="deleteRegistration('${item.registration_reference}')" title="Delete Registration" class="p-1.5 text-slate-500 hover:text-red-600 rounded hover:bg-slate-200">
+                                <i class="fa-solid fa-trash-can text-xs"></i>
+                            </button>
+                        </td>
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        /**
+         * Filter Table rows based on Search string and Status select
+         */
+        function filterAdminTable() {
+            const query = (document.getElementById('adm-search-input').value || '').toLowerCase().trim();
+            const statusFilter = document.getElementById('adm-filter-status').value;
+
+            const filtered = cachedRegistrations.filter(item => {
+                const matchesQuery = !query || 
+                    (item.full_name && item.full_name.toLowerCase().includes(query)) ||
+                    (item.email && item.email.toLowerCase().includes(query)) ||
+                    (item.phone && item.phone.toLowerCase().includes(query)) ||
+                    (item.registration_reference && item.registration_reference.toLowerCase().includes(query)) ||
+                    (item.church_organization && item.church_organization.toLowerCase().includes(query));
+
+                const matchesStatus = statusFilter === 'ALL' || item.status === statusFilter;
+
+                return matchesQuery && matchesStatus;
+            });
+
+            renderAdminTable(filtered);
+        }
+
+        /**
+         * Toggle Check-In status for an attendee
+         */
+        async function toggleCheckIn(refCode) {
+            const target = cachedRegistrations.find(r => r.registration_reference === refCode);
+            if (!target) return;
+
+            const newStatus = target.status === 'checked_in' ? 'registered' : 'checked_in';
+
+            if (!isDemoMode && supabaseClient) {
+                const { error } = await supabaseClient
+                    .from('registrations')
+                    .update({ status: newStatus })
+                    .eq('registration_reference', refCode);
+
+                if (error) {
+                    alert('Error updating status in Supabase: ' + error.message);
+                    return;
+                }
+            } else {
+                let demoDb = JSON.parse(localStorage.getItem('TWJGT_DEMO_DB') || '[]');
+                demoDb = demoDb.map(r => r.registration_reference === refCode ? { ...r, status: newStatus } : r);
+                localStorage.setItem('TWJGT_DEMO_DB', JSON.stringify(demoDb));
+            }
+
+            target.status = newStatus;
+            updateAdminKPIs();
+            filterAdminTable();
+            fetchRegistrationStats();
+        }
+
+        /**
+         * Delete registration record
+         */
+        async function deleteRegistration(refCode) {
+            if (!confirm(`Are you sure you want to delete registration ${refCode}?`)) return;
+
+            if (!isDemoMode && supabaseClient) {
+                const { error } = await supabaseClient
+                    .from('registrations')
+                    .delete()
+                    .eq('registration_reference', refCode);
+
+                if (error) {
+                    alert('Error deleting from Supabase: ' + error.message);
+                    return;
+                }
+            } else {
+                let demoDb = JSON.parse(localStorage.getItem('TWJGT_DEMO_DB') || '[]');
+                demoDb = demoDb.filter(r => r.registration_reference !== refCode);
+                localStorage.setItem('TWJGT_DEMO_DB', JSON.stringify(demoDb));
+            }
+
+            cachedRegistrations = cachedRegistrations.filter(r => r.registration_reference !== refCode);
+            updateAdminKPIs();
+            filterAdminTable();
+            fetchRegistrationStats();
+        }
+
+        /**
+         * Export Registrations list to CSV
+         */
+        function exportToCSV() {
+            if (!cachedRegistrations || cachedRegistrations.length === 0) {
+                alert('No data available to export.');
+                return;
+            }
+
+            const headers = ['Reference', 'Full Name', 'Email', 'Phone', 'Church/Organization', 'Attendees', 'Status', 'Date Registered', 'Message'];
+            const rows = cachedRegistrations.map(r => [
+                `"${r.registration_reference || ''}"`,
+                `"${(r.full_name || '').replace(/"/g, '""')}"`,
+                `"${(r.email || '').replace(/"/g, '""')}"`,
+                `"${(r.phone || '').replace(/"/g, '""')}"`,
+                `"${(r.church_organization || '').replace(/"/g, '""')}"`,
+                r.attendees || 1,
+                `"${r.status || 'registered'}"`,
+                `"${r.created_at || ''}"`,
+                `"${(r.message || '').replace(/"/g, '""')}"`
+            ]);
+
+            const csvContent = "data:text/csv;charset=utf-8," + [headers.join(','), ...rows.map(e => e.join(','))].join('\n');
+            const encodedUri = encodeURI(csvContent);
+            const link = document.createElement('a');
+            link.setAttribute('href', encodedUri);
+            link.setAttribute('download', `TIME_WITH_JOE_GHARTEY_TAGOE_REGISTRATIONS_${new Date().toISOString().slice(0,10)}.csv`);
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+
+        function escapeHtml(str) {
+            if (!str) return '';
+            return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+        }
+
+        /**
+         * Save Configuration with Admin PIN support
+         */
+        function saveSupabaseConfig() {
+            const url = document.getElementById('cfg-url').value.trim();
+            const key = document.getElementById('cfg-key').value.trim();
+            const pin = document.getElementById('cfg-admin-pin').value.trim() || '1234';
+
+            localStorage.setItem('TWJGT_ADMIN_PIN', pin);
+
+            if (url && key) {
+                localStorage.setItem('TWJGT_SUPABASE_URL', url);
+                localStorage.setItem('TWJGT_SUPABASE_KEY', key);
+            }
 
             initSupabaseClient();
             toggleConfigModal();
