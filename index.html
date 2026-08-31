@@ -333,7 +333,7 @@
     </main>
 
     <!-- SUPABASE SETTINGS MODAL -->
-    <div id="config-modal" class="fixed inset-0 bg-navy-950/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+    <div id="config-modal" class="fixed inset-0 bg-navy-950/80 backdrop-blur-sm z-[60] flex items-center justify-center p-4 hidden">
         <div class="bg-white rounded-2xl max-w-lg w-full p-6 shadow-2xl border border-slate-200 space-y-4">
             <div class="flex justify-between items-center border-b border-slate-100 pb-3">
                 <h3 class="text-lg font-bold text-navy-900 flex items-center gap-2">
@@ -377,7 +377,7 @@
     </div>
 
     <!-- SQL TABLE CREATION MODAL -->
-    <div id="sql-modal" class="fixed inset-0 bg-navy-950/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+    <div id="sql-modal" class="fixed inset-0 bg-navy-950/80 backdrop-blur-sm z-[60] flex items-center justify-center p-4 hidden">
         <div class="bg-white rounded-2xl max-w-2xl w-full p-6 shadow-2xl border border-slate-200 space-y-4">
             <div class="flex justify-between items-center border-b border-slate-100 pb-3">
                 <h3 class="text-lg font-bold text-navy-900 flex items-center gap-2">
@@ -452,7 +452,7 @@ USING (true);
     </div>
 
     <!-- DELETE CONFIRMATION MODAL -->
-    <div id="delete-modal" class="fixed inset-0 bg-navy-950/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+    <div id="delete-modal" class="fixed inset-0 bg-navy-950/80 backdrop-blur-sm z-[60] flex items-center justify-center p-4 hidden">
         <div class="bg-white rounded-2xl max-w-sm w-full p-6 shadow-2xl border border-slate-200 space-y-4 text-center">
             <div class="w-12 h-12 bg-red-100 text-red-600 rounded-full flex items-center justify-center mx-auto text-xl">
                 <i class="fa-solid fa-trash-can"></i>
@@ -483,7 +483,7 @@ USING (true);
 
             <form onsubmit="verifyAdminPin(event)" class="space-y-4">
                 <div>
-                    <input type="password" id="admin-pin-input" placeholder="Enter Admin User ID (0597458456)" autofocus
+                    <input type="password" id="admin-pin-input" autofocus
                         class="w-full px-4 py-3 text-center text-lg font-mono tracking-widest border border-slate-300 rounded-xl focus:ring-2 focus:ring-gold-500 focus:outline-none">
                     <span id="pin-error" class="hidden text-xs text-red-600 mt-1 block">Invalid Admin User ID</span>
                 </div>
