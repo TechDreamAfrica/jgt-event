@@ -1,0 +1,812 @@
+<!DOCTYPE html>
+<html lang="en" class="h-full bg-slate-900">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TIME WITH JOE GHARTEY-TAGOE | Event Registration</title>
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;0,700;1,600&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        navy: {
+                            800: '#111827',
+                            900: '#0b132b',
+                            950: '#050a17',
+                        },
+                        gold: {
+                            400: '#e5c158',
+                            500: '#d4af37',
+                            600: '#b8860b',
+                            700: '#966d03',
+                        },
+                        cream: {
+                            50: '#fdfbf7',
+                            100: '#f7f4ed',
+                            200: '#eee8da',
+                        }
+                    },
+                    fontFamily: {
+                        serif: ['"Cormorant Garamond"', 'Georgia', 'serif'],
+                        sans: ['Inter', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+
+    <!-- Supabase JS Client v2 CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+    <style>
+        /* Custom scrollbar for form panel */
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 6px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: #f7f4ed;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 3px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
+        /* Smooth transitions */
+        .transition-all-200 {
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+    </style>
+</head>
+<body class="h-full text-slate-800 font-sans antialiased bg-navy-950 flex flex-col justify-between selection:bg-gold-500 selection:text-navy-950">
+
+    <!-- Top Utility / Supabase Config Banner -->
+    <header id="top-bar" class="bg-navy-900 border-b border-navy-800 text-xs text-slate-300 py-2.5 px-4 z-30 flex flex-wrap items-center justify-between gap-3 shrink-0">
+        <div class="flex items-center gap-2">
+            <span class="inline-block w-2.5 h-2.5 rounded-full bg-amber-500" id="status-indicator"></span>
+            <span class="font-medium text-slate-200" id="backend-status-text">Supabase: Not Configured (Demo Mode)</span>
+        </div>
+        <div class="flex items-center gap-3">
+            <button onclick="toggleConfigModal()" class="inline-flex items-center gap-1.5 bg-navy-800 hover:bg-slate-800 text-gold-400 border border-gold-500/30 px-3 py-1 rounded-md transition-all font-medium">
+                <i class="fa-solid fa-gear"></i>
+                <span>Supabase Settings</span>
+            </button>
+            <button onclick="toggleSqlModal()" class="inline-flex items-center gap-1.5 bg-navy-800 hover:bg-slate-800 text-slate-300 border border-slate-700 px-3 py-1 rounded-md transition-all">
+                <i class="fa-solid fa-database"></i>
+                <span>SQL Table Script</span>
+            </button>
+        </div>
+    </header>
+
+    <!-- Main Content Split Screen Wrapper -->
+    <main class="flex-1 w-full flex flex-col lg:flex-row overflow-hidden max-w-[1920px] mx-auto min-h-0">
+
+        <!-- LEFT PANEL: Event Information -->
+        <section class="lg:w-1/2 relative bg-navy-950 flex flex-col justify-between p-6 sm:p-10 lg:p-14 overflow-y-auto custom-scrollbar border-b lg:border-b-0 lg:border-r border-navy-800">
+            <!-- Background Image with Overlay -->
+            <div class="absolute inset-0 z-0">
+                <img id="bg-image" src="" alt="Worship and Christian Fellowship Gathering" class="w-full h-full object-cover object-center opacity-30">
+                <div class="absolute inset-0 bg-navy-950/80"></div>
+                <!-- Fine Warm Gold Accent Line on edge -->
+                <div class="absolute right-0 top-0 bottom-0 w-1 bg-gold-500 hidden lg:block"></div>
+            </div>
+
+            <!-- Content Container -->
+            <div class="relative z-10 flex flex-col h-full justify-between gap-8">
+                <!-- Top Brand Header -->
+                <div>
+                    <div class="inline-flex items-center gap-2 px-3 py-1 bg-gold-500/10 border border-gold-500/30 rounded-full text-gold-400 text-xs font-semibold uppercase tracking-wider mb-6">
+                        <i class="fa-solid fa-cross text-xs"></i>
+                        <span>Special Digital Invitation</span>
+                    </div>
+
+                    <!-- Title Block -->
+                    <div class="space-y-1">
+                        <p class="text-gold-400 font-serif text-xl sm:text-2xl tracking-widest uppercase font-semibold">TIME WITH</p>
+                        <h1 id="event-speaker" class="text-4xl sm:text-5xl lg:text-6xl font-serif font-bold text-white tracking-tight leading-none uppercase">
+                            JOE GHARTEY-TAGOE
+                        </h1>
+                    </div>
+
+                    <!-- Tagline -->
+                    <p id="event-tagline" class="mt-4 text-gold-400 font-serif italic text-lg sm:text-xl border-l-2 border-gold-500 pl-4 py-1">
+                        "An Encounter. A Conversation. A Time of Grace."
+                    </p>
+
+                    <!-- Short Description -->
+                    <p id="event-description" class="mt-6 text-slate-300 text-base leading-relaxed max-w-xl">
+                        Join us for a special time of fellowship, inspiration, reflection and spiritual enrichment.
+                    </p>
+                </div>
+
+                <!-- Middle: Event Details Card -->
+                <div class="my-6 bg-navy-900/90 border border-gold-500/20 rounded-xl p-6 space-y-4 backdrop-blur-md shadow-2xl">
+                    <h2 class="text-xs font-semibold text-gold-400 uppercase tracking-widest border-b border-navy-800 pb-2">
+                        Event Specifications
+                    </h2>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
+                        <!-- Date -->
+                        <div class="flex items-start space-x-3">
+                            <div class="w-10 h-10 rounded-lg bg-navy-950 border border-gold-500/30 flex items-center justify-center text-gold-400 shrink-0 mt-0.5">
+                                <i class="fa-regular fa-calendar-days text-base"></i>
+                            </div>
+                            <div>
+                                <span class="text-xs text-slate-400 uppercase font-semibold block">Date</span>
+                                <span id="event-date" class="text-white font-medium">Saturday, October 24, 2026</span>
+                            </div>
+                        </div>
+
+                        <!-- Time -->
+                        <div class="flex items-start space-x-3">
+                            <div class="w-10 h-10 rounded-lg bg-navy-950 border border-gold-500/30 flex items-center justify-center text-gold-400 shrink-0 mt-0.5">
+                                <i class="fa-regular fa-clock text-base"></i>
+                            </div>
+                            <div>
+                                <span class="text-xs text-slate-400 uppercase font-semibold block">Time</span>
+                                <span id="event-time" class="text-white font-medium">5:00 PM GMT</span>
+                            </div>
+                        </div>
+
+                        <!-- Venue -->
+                        <div class="flex items-start space-x-3">
+                            <div class="w-10 h-10 rounded-lg bg-navy-950 border border-gold-500/30 flex items-center justify-center text-gold-400 shrink-0 mt-0.5">
+                                <i class="fa-solid fa-church text-base"></i>
+                            </div>
+                            <div>
+                                <span class="text-xs text-slate-400 uppercase font-semibold block">Venue</span>
+                                <span id="event-venue" class="text-white font-medium">Grace Chapel Main Auditorium</span>
+                            </div>
+                        </div>
+
+                        <!-- Location -->
+                        <div class="flex items-start space-x-3">
+                            <div class="w-10 h-10 rounded-lg bg-navy-950 border border-gold-500/30 flex items-center justify-center text-gold-400 shrink-0 mt-0.5">
+                                <i class="fa-solid fa-location-dot text-base"></i>
+                            </div>
+                            <div>
+                                <span class="text-xs text-slate-400 uppercase font-semibold block">Location</span>
+                                <span id="event-location" class="text-white font-medium">Airport Residential Area, Accra</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Footer note in Left panel -->
+                <div class="pt-4 border-t border-navy-800/80 flex items-center justify-between text-xs text-slate-400">
+                    <span class="flex items-center gap-1.5">
+                        <i class="fa-solid fa-ticket text-gold-500"></i> Free Admission • Open to All
+                    </span>
+                    <span>Registration Mandatory</span>
+                </div>
+            </div>
+        </section>
+
+        <!-- RIGHT PANEL: Registration Form & Success State -->
+        <section class="lg:w-1/2 bg-cream-50 flex flex-col justify-center p-6 sm:p-10 lg:p-14 overflow-y-auto custom-scrollbar">
+            
+            <div class="max-w-md w-full mx-auto my-auto">
+                
+                <!-- REGISTRATION FORM CONTAINER -->
+                <div id="form-container" class="block bg-white rounded-2xl shadow-xl border border-cream-200 p-6 sm:p-8">
+                    <div class="mb-6">
+                        <h2 class="text-2xl sm:text-3xl font-serif font-bold text-navy-900">
+                            Register Your Interest
+                        </h2>
+                        <p class="text-slate-600 text-sm mt-1">
+                            We'd love to have you join us. Please fill out the form below.
+                        </p>
+                    </div>
+
+                    <!-- General Error Alert -->
+                    <div id="error-alert" class="hidden mb-6 p-4 rounded-xl bg-red-50 border border-red-200 text-red-700 text-sm flex items-start gap-3">
+                        <i class="fa-solid fa-circle-exclamation text-red-500 mt-0.5 shrink-0"></i>
+                        <div id="error-message">Something went wrong. Please check your details and try again.</div>
+                    </div>
+
+                    <!-- Registration Form -->
+                    <form id="registration-form" onsubmit="handleFormSubmit(event)" novalidate class="space-y-4">
+                        
+                        <!-- Full Name -->
+                        <div>
+                            <label for="full_name" class="block text-xs font-semibold uppercase tracking-wider text-navy-900 mb-1">
+                                Full Name <span class="text-red-500">*</span>
+                            </label>
+                            <div class="relative">
+                                <input type="text" id="full_name" name="full_name" required
+                                    placeholder="e.g. Emmanuel Mensah"
+                                    class="w-full px-4 py-2.5 bg-cream-50 border border-slate-300 rounded-lg text-slate-900 text-sm focus:outline-none focus:ring-2 focus:ring-gold-500 focus:border-gold-500 focus:bg-white transition-all">
+                            </div>
+                            <span class="field-error hidden text-xs text-red-600 mt-1">Full name is required</span>
+                        </div>
+
+                        <!-- Email Address -->
+                        <div>
+                            <label for="email" class="block text-xs font-semibold uppercase tracking-wider text-navy-900 mb-1">
+                                Email Address <span class="text-red-500">*</span>
+                            </label>
+                            <input type="email" id="email" name="email" required
+                                placeholder="name@example.com"
+                                class="w-full px-4 py-2.5 bg-cream-50 border border-slate-300 rounded-lg text-slate-900 text-sm focus:outline-none focus:ring-2 focus:ring-gold-500 focus:border-gold-500 focus:bg-white transition-all">
+                            <span class="field-error hidden text-xs text-red-600 mt-1">Valid email address is required</span>
+                        </div>
+
+                        <!-- Phone Number -->
+                        <div>
+                            <label for="phone" class="block text-xs font-semibold uppercase tracking-wider text-navy-900 mb-1">
+                                Phone Number <span class="text-red-500">*</span>
+                            </label>
+                            <input type="tel" id="phone" name="phone" required
+                                placeholder="+233 24 123 4567"
+                                class="w-full px-4 py-2.5 bg-cream-50 border border-slate-300 rounded-lg text-slate-900 text-sm focus:outline-none focus:ring-2 focus:ring-gold-500 focus:border-gold-500 focus:bg-white transition-all">
+                            <span class="field-error hidden text-xs text-red-600 mt-1">Phone number is required</span>
+                        </div>
+
+                        <!-- Church / Organization (Optional) -->
+                        <div>
+                            <label for="church_organization" class="block text-xs font-semibold uppercase tracking-wider text-navy-900 mb-1">
+                                Church / Organization <span class="text-slate-400 font-normal lowercase">(optional)</span>
+                            </label>
+                            <input type="text" id="church_organization" name="church_organization"
+                                placeholder="e.g. Grace Fellowship Int."
+                                class="w-full px-4 py-2.5 bg-cream-50 border border-slate-300 rounded-lg text-slate-900 text-sm focus:outline-none focus:ring-2 focus:ring-gold-500 focus:border-gold-500 focus:bg-white transition-all">
+                        </div>
+
+                        <!-- Number of Attendees -->
+                        <div>
+                            <label for="attendees" class="block text-xs font-semibold uppercase tracking-wider text-navy-900 mb-1">
+                                Number of Attendees <span class="text-red-500">*</span>
+                            </label>
+                            <div class="flex items-center">
+                                <button type="button" onclick="adjustAttendees(-1)" class="w-10 h-10 rounded-l-lg bg-slate-100 hover:bg-slate-200 border border-r-0 border-slate-300 text-slate-700 font-bold text-lg flex items-center justify-center transition-all">
+                                    -
+                                </button>
+                                <input type="number" id="attendees" name="attendees" min="1" max="20" value="1" required
+                                    class="w-full h-10 text-center bg-cream-50 border-y border-slate-300 text-slate-900 font-semibold text-sm focus:outline-none focus:ring-1 focus:ring-gold-500">
+                                <button type="button" onclick="adjustAttendees(1)" class="w-10 h-10 rounded-r-lg bg-slate-100 hover:bg-slate-200 border border-l-0 border-slate-300 text-slate-700 font-bold text-lg flex items-center justify-center transition-all">
+                                    +
+                                </button>
+                            </div>
+                            <span class="field-error hidden text-xs text-red-600 mt-1">Must be at least 1 attendee</span>
+                        </div>
+
+                        <!-- Message / Special Request (Optional) -->
+                        <div>
+                            <label for="message" class="block text-xs font-semibold uppercase tracking-wider text-navy-900 mb-1">
+                                Message / Special Request <span class="text-slate-400 font-normal lowercase">(optional)</span>
+                            </label>
+                            <textarea id="message" name="message" rows="3"
+                                placeholder="Any prayer requests or note for the team..."
+                                class="w-full px-4 py-2.5 bg-cream-50 border border-slate-300 rounded-lg text-slate-900 text-sm focus:outline-none focus:ring-2 focus:ring-gold-500 focus:border-gold-500 focus:bg-white transition-all"></textarea>
+                        </div>
+
+                        <!-- Checkbox Consent -->
+                        <div class="pt-2">
+                            <label class="flex items-start gap-3 cursor-pointer select-none group">
+                                <input type="checkbox" id="updates_consent" name="updates_consent" checked
+                                    class="mt-1 w-4 h-4 rounded border-slate-300 text-gold-600 focus:ring-gold-500">
+                                <span class="text-xs text-slate-600 leading-snug group-hover:text-slate-900 transition-all">
+                                    I agree to receive updates and information about the event via email or SMS.
+                                </span>
+                            </label>
+                        </div>
+
+                        <!-- Submit Button -->
+                        <div class="pt-4">
+                            <button type="submit" id="submit-btn"
+                                class="w-full py-3.5 px-6 rounded-lg bg-gold-500 hover:bg-gold-600 active:bg-gold-700 text-navy-950 font-bold uppercase tracking-wider text-sm shadow-lg hover:shadow-xl transition-all duration-200 flex items-center justify-center space-x-2">
+                                <span id="btn-text">REGISTER NOW</span>
+                                <i id="btn-spinner" class="fa-solid fa-circle-notch fa-spin hidden text-lg"></i>
+                            </button>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- SUCCESS SCREEN (Hidden initial state) -->
+                <div id="success-container" class="hidden bg-white rounded-2xl shadow-xl border border-cream-200 p-8 text-center space-y-6">
+                    <div class="w-16 h-16 rounded-full bg-emerald-100 text-emerald-600 mx-auto flex items-center justify-center text-3xl shadow-inner">
+                        <i class="fa-solid fa-check"></i>
+                    </div>
+
+                    <div>
+                        <span class="inline-block px-3 py-1 bg-emerald-100 text-emerald-800 text-xs font-semibold rounded-full uppercase tracking-wider mb-2">
+                            ✓ Registration Confirmed
+                        </span>
+                        <h2 class="text-3xl font-serif font-bold text-navy-900">
+                            Registration Successful
+                        </h2>
+                        <p class="text-slate-600 text-sm mt-2 leading-relaxed">
+                            Thank you for registering for <span class="font-semibold text-navy-900">Time With Joe Ghartey-Tagoe</span>. We look forward to seeing you at the event.
+                        </p>
+                    </div>
+
+                    <!-- Reference Code Box -->
+                    <div class="bg-cream-100 border border-gold-500/30 rounded-xl p-5 space-y-1">
+                        <span class="text-xs font-semibold uppercase tracking-widest text-slate-500 block">
+                            Your Registration Reference
+                        </span>
+                        <div id="display-ref-code" class="text-2xl sm:text-3xl font-mono font-bold text-gold-600 tracking-wider">
+                            TWJGT-2026-0000
+                        </div>
+                        <p class="text-[11px] text-slate-500 pt-1">
+                            Please save or screenshot this reference number for check-in.
+                        </p>
+                    </div>
+
+                    <!-- Details Summary -->
+                    <div class="text-left bg-slate-50 rounded-lg p-4 text-xs space-y-2 border border-slate-200">
+                        <div class="flex justify-between"><span class="text-slate-500">Attendee:</span> <span id="summary-name" class="font-semibold text-slate-800">-</span></div>
+                        <div class="flex justify-between"><span class="text-slate-500">Email:</span> <span id="summary-email" class="font-semibold text-slate-800">-</span></div>
+                        <div class="flex justify-between"><span class="text-slate-500">Seats Reserved:</span> <span id="summary-attendees" class="font-semibold text-slate-800">1</span></div>
+                    </div>
+
+                    <!-- Action Button -->
+                    <button onclick="resetRegistrationForm()"
+                        class="w-full py-3 px-6 rounded-lg bg-navy-900 hover:bg-navy-800 text-white font-semibold text-sm transition-all shadow-md">
+                        Register Another Person
+                    </button>
+                </div>
+
+            </div>
+        </section>
+    </main>
+
+    <!-- SUPABASE SETTINGS MODAL -->
+    <div id="config-modal" class="fixed inset-0 bg-navy-950/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+        <div class="bg-white rounded-2xl max-w-lg w-full p-6 shadow-2xl border border-slate-200 space-y-4">
+            <div class="flex justify-between items-center border-b border-slate-100 pb-3">
+                <h3 class="text-lg font-bold text-navy-900 flex items-center gap-2">
+                    <i class="fa-solid fa-sliders text-gold-500"></i> Supabase Backend Connection
+                </h3>
+                <button onclick="toggleConfigModal()" class="text-slate-400 hover:text-slate-600 p-1">
+                    <i class="fa-solid fa-xmark text-lg"></i>
+                </button>
+            </div>
+            
+            <p class="text-xs text-slate-600">
+                To link to your real Supabase instance, enter your <strong>Project URL</strong> and <strong>Anon Key</strong> below. These will be saved locally in your browser.
+            </p>
+
+            <div class="space-y-3 text-sm">
+                <div>
+                    <label class="block text-xs font-semibold text-slate-700 uppercase mb-1">Supabase Project URL</label>
+                    <input type="url" id="cfg-url" placeholder="https://xyzcompany.supabase.co" class="w-full px-3 py-2 border border-slate-300 rounded-md focus:ring-2 focus:ring-gold-500 text-xs">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-700 uppercase mb-1">Supabase Anon Key</label>
+                    <textarea id="cfg-key" rows="3" placeholder="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..." class="w-full px-3 py-2 border border-slate-300 rounded-md focus:ring-2 focus:ring-gold-500 text-xs font-mono"></textarea>
+                </div>
+            </div>
+
+            <div class="pt-2 flex justify-between items-center">
+                <button onclick="clearSupabaseConfig()" class="text-xs text-red-600 hover:underline">
+                    Reset to Demo Mode
+                </button>
+                <div class="space-x-2">
+                    <button onclick="toggleConfigModal()" class="px-4 py-2 text-xs font-semibold text-slate-600 hover:bg-slate-100 rounded-md">Cancel</button>
+                    <button onclick="saveSupabaseConfig()" class="px-4 py-2 text-xs font-semibold text-navy-950 bg-gold-500 hover:bg-gold-600 rounded-md">Save & Connect</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- SQL TABLE CREATION MODAL -->
+    <div id="sql-modal" class="fixed inset-0 bg-navy-950/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+        <div class="bg-white rounded-2xl max-w-2xl w-full p-6 shadow-2xl border border-slate-200 space-y-4">
+            <div class="flex justify-between items-center border-b border-slate-100 pb-3">
+                <h3 class="text-lg font-bold text-navy-900 flex items-center gap-2">
+                    <i class="fa-solid fa-code text-gold-500"></i> Supabase SQL Setup Script
+                </h3>
+                <button onclick="toggleSqlModal()" class="text-slate-400 hover:text-slate-600 p-1">
+                    <i class="fa-solid fa-xmark text-lg"></i>
+                </button>
+            </div>
+            
+            <p class="text-xs text-slate-600">
+                Run this SQL in your Supabase <strong>SQL Editor</strong> to create the <code>registrations</code> table with Row Level Security (RLS) configured for anonymous registrations:
+            </p>
+
+            <pre class="bg-navy-950 text-gold-400 p-4 rounded-xl text-xs font-mono overflow-x-auto max-h-72 custom-scrollbar select-all" id="sql-code">
+-- 1. Create registrations table
+CREATE TABLE IF NOT EXISTS public.registrations (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    full_name TEXT NOT NULL,
+    email TEXT NOT NULL UNIQUE,
+    phone TEXT NOT NULL,
+    church_organization TEXT,
+    attendees INTEGER NOT NULL DEFAULT 1,
+    message TEXT,
+    updates_consent BOOLEAN NOT NULL DEFAULT true,
+    registration_reference TEXT UNIQUE NOT NULL,
+    created_at TIMESTAMPTZ DEFAULT NOW(),
+    status TEXT DEFAULT 'registered'
+);
+
+-- 2. Enable Row Level Security
+ALTER TABLE public.registrations ENABLE ROW LEVEL SECURITY;
+
+-- 3. Policy: Allow anonymous users to INSERT new registrations
+CREATE POLICY "Allow public insert" 
+ON public.registrations 
+FOR INSERT 
+TO anon 
+WITH CHECK (true);
+
+-- 4. Policy: Restrict SELECT to authenticated service role / admins only
+-- Anonymous users cannot read, update, or delete registrations.
+            </pre>
+
+            <div class="flex justify-between items-center pt-2">
+                <button onclick="copySqlCode()" class="inline-flex items-center gap-1.5 px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold rounded-md transition-all">
+                    <i class="fa-regular fa-copy"></i> Copy SQL Code
+                </button>
+                <button onclick="toggleSqlModal()" class="px-4 py-2 bg-navy-900 text-white text-xs font-semibold rounded-md">
+                    Done
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- JAVASCRIPT APP LOGIC -->
+    <script>
+        /**
+         * EVENT CONFIGURATION OBJECT
+         * All event parameters are centralized here for easy edits.
+         */
+        const EVENT_CONFIG = {
+            title: "TIME WITH JOE GHARTEY-TAGOE",
+            speakerName: "JOE GHARTEY-TAGOE",
+            tagline: '"An Encounter. A Conversation. A Time of Grace."',
+            description: "Join us for a special time of fellowship, inspiration, reflection and spiritual enrichment.",
+            date: "Saturday, October 24, 2026",
+            time: "5:00 PM GMT",
+            venue: "Grace Chapel Main Auditorium",
+            location: "Airport Residential Area, Accra",
+            // High quality Christian fellowship / worship image
+            bgImage: "https://images.unsplash.com/photo-1510563800743-aed236490d08?auto=format&fit=crop&w=1600&q=80"
+        };
+
+        // Supabase client instance
+        let supabaseClient = null;
+        let isDemoMode = true;
+
+        // Initialize App on DOM Content Loaded
+        document.addEventListener('DOMContentLoaded', () => {
+            populateEventDetails();
+            initSupabaseClient();
+        });
+
+        /**
+         * Render Configuration Object into HTML elements
+         */
+        function populateEventDetails() {
+            document.getElementById('event-speaker').innerText = EVENT_CONFIG.speakerName;
+            document.getElementById('event-tagline').innerText = EVENT_CONFIG.tagline;
+            document.getElementById('event-description').innerText = EVENT_CONFIG.description;
+            document.getElementById('event-date').innerText = EVENT_CONFIG.date;
+            document.getElementById('event-time').innerText = EVENT_CONFIG.time;
+            document.getElementById('event-venue').innerText = EVENT_CONFIG.venue;
+            document.getElementById('event-location').innerText = EVENT_CONFIG.location;
+            
+            const bgImgEl = document.getElementById('bg-image');
+            bgImgEl.src = EVENT_CONFIG.bgImage;
+            bgImgEl.onerror = () => {
+                // Fallback image if unsplash load is blocked
+                bgImgEl.src = "https://images.unsplash.com/photo-1438232992991-995b7058bbb3?auto=format&fit=crop&w=1600&q=80";
+            };
+        }
+
+        /**
+         * Initialize Supabase client if keys exist in localStorage
+         */
+        function initSupabaseClient() {
+            const savedUrl = localStorage.getItem('TWJGT_SUPABASE_URL');
+            const savedKey = localStorage.getItem('TWJGT_SUPABASE_KEY');
+
+            const statusIndicator = document.getElementById('status-indicator');
+            const statusText = document.getElementById('backend-status-text');
+
+            if (savedUrl && savedKey && window.supabase) {
+                try {
+                    supabaseClient = window.supabase.createClient(savedUrl, savedKey);
+                    isDemoMode = false;
+                    statusIndicator.className = "inline-block w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse";
+                    statusText.innerText = "Supabase Connected";
+                    document.getElementById('cfg-url').value = savedUrl;
+                    document.getElementById('cfg-key').value = savedKey;
+                    return;
+                } catch (e) {
+                    console.warn("Supabase init error:", e);
+                }
+            }
+
+            // Fallback to Demo mode
+            supabaseClient = null;
+            isDemoMode = true;
+            statusIndicator.className = "inline-block w-2.5 h-2.5 rounded-full bg-amber-400";
+            statusText.innerText = "Supabase: Demo Mode (In-Memory)";
+        }
+
+        /**
+         * Adjust Attendee Counter
+         */
+        function adjustAttendees(delta) {
+            const input = document.getElementById('attendees');
+            let val = parseInt(input.value) || 1;
+            val = Math.max(1, Math.min(20, val + delta));
+            input.value = val;
+        }
+
+        /**
+         * Generate Unique Registration Reference Number
+         * Example: TWJGT-2026-4892
+         */
+        function generateReferenceCode() {
+            const randomDigits = Math.floor(1000 + Math.random() * 9000);
+            return `TWJGT-2026-${randomDigits}`;
+        }
+
+        /**
+         * Validate Email Helper
+         */
+        function isValidEmail(email) {
+            const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            return re.test(String(email).toLowerCase());
+        }
+
+        /**
+         * Handle Registration Form Submission
+         */
+        async function handleFormSubmit(event) {
+            event.preventDefault();
+            hideError();
+
+            const form = event.target;
+            const fullName = form.full_name.value.trim();
+            const email = form.email.value.trim();
+            const phone = form.phone.value.trim();
+            const churchOrg = form.church_organization.value.trim();
+            const attendees = parseInt(form.attendees.value) || 1;
+            const message = form.message.value.trim();
+            const updatesConsent = form.updates_consent.checked;
+
+            // Form Validations
+            let isValid = true;
+            
+            if (!fullName) {
+                showFieldError('full_name', 'Full name is required');
+                isValid = false;
+            } else {
+                hideFieldError('full_name');
+            }
+
+            if (!email || !isValidEmail(email)) {
+                showFieldError('email', 'Please enter a valid email address');
+                isValid = false;
+            } else {
+                hideFieldError('email');
+            }
+
+            if (!phone) {
+                showFieldError('phone', 'Phone number is required');
+                isValid = false;
+            } else {
+                hideFieldError('phone');
+            }
+
+            if (attendees < 1) {
+                showFieldError('attendees', 'Must be at least 1 attendee');
+                isValid = false;
+            } else {
+                hideFieldError('attendees');
+            }
+
+            if (!isValid) return;
+
+            // Show Loading State
+            setLoadingState(true);
+
+            const refCode = generateReferenceCode();
+            const recordData = {
+                full_name: fullName,
+                email: email,
+                phone: phone,
+                church_organization: churchOrg || null,
+                attendees: attendees,
+                message: message || null,
+                updates_consent: updatesConsent,
+                registration_reference: refCode,
+                status: 'registered',
+                created_at: new Date().toISOString()
+            };
+
+            try {
+                if (!isDemoMode && supabaseClient) {
+                    // Real Supabase Insertion
+                    const { data, error } = await supabaseClient
+                        .from('registrations')
+                        .insert([recordData]);
+
+                    if (error) {
+                        console.error('Supabase error code/message:', error);
+                        // Unique email constraint handling
+                        if (error.code === '23505' || (error.message && error.message.includes('unique'))) {
+                            showError('This email address has already been registered for the event.');
+                        } else {
+                            showError('Something went wrong. Please check your details and try again.');
+                        }
+                        setLoadingState(false);
+                        return;
+                    }
+                } else {
+                    // Demo Mode delay simulation
+                    await new Promise(resolve => setTimeout(resolve, 800));
+                    
+                    // Simple local check for demo duplicate
+                    const demoDb = JSON.parse(localStorage.getItem('TWJGT_DEMO_DB') || '[]');
+                    const exists = demoDb.some(item => item.email.toLowerCase() === email.toLowerCase());
+                    if (exists) {
+                        showError('This email address has already been registered for the event.');
+                        setLoadingState(false);
+                        return;
+                    }
+                    demoDb.push(recordData);
+                    localStorage.setItem('TWJGT_DEMO_DB', JSON.stringify(demoDb));
+                }
+
+                // Render Success View
+                renderSuccessScreen(recordData);
+
+            } catch (err) {
+                console.error('Unexpected error:', err);
+                showError('Something went wrong. Please check your details and try again.');
+            } finally {
+                setLoadingState(false);
+            }
+        }
+
+        /**
+         * UI State Helpers
+         */
+        function setLoadingState(loading) {
+            const submitBtn = document.getElementById('submit-btn');
+            const btnText = document.getElementById('btn-text');
+            const btnSpinner = document.getElementById('btn-spinner');
+
+            if (loading) {
+                submitBtn.disabled = true;
+                submitBtn.classList.add('opacity-80', 'cursor-not-allowed');
+                btnText.innerText = 'PROCESSING...';
+                btnSpinner.classList.remove('hidden');
+            } else {
+                submitBtn.disabled = false;
+                submitBtn.classList.remove('opacity-80', 'cursor-not-allowed');
+                btnText.innerText = 'REGISTER NOW';
+                btnSpinner.classList.add('hidden');
+            }
+        }
+
+        function showFieldError(fieldId, msg) {
+            const input = document.getElementById(fieldId);
+            const errorSpan = input.closest('div').parentElement.querySelector('.field-error');
+            if (input) input.classList.add('border-red-500');
+            if (errorSpan) {
+                errorSpan.innerText = msg;
+                errorSpan.classList.remove('hidden');
+            }
+        }
+
+        function hideFieldError(fieldId) {
+            const input = document.getElementById(fieldId);
+            const errorSpan = input.closest('div').parentElement.querySelector('.field-error');
+            if (input) input.classList.remove('border-red-500');
+            if (errorSpan) errorSpan.classList.add('hidden');
+        }
+
+        function showError(msg) {
+            const errorAlert = document.getElementById('error-alert');
+            const errorMsg = document.getElementById('error-message');
+            errorMsg.innerText = msg;
+            errorAlert.classList.remove('hidden');
+        }
+
+        function hideError() {
+            document.getElementById('error-alert').classList.add('hidden');
+        }
+
+        /**
+         * Render Success Screen
+         */
+        function renderSuccessScreen(data) {
+            document.getElementById('display-ref-code').innerText = data.registration_reference;
+            document.getElementById('summary-name').innerText = data.full_name;
+            document.getElementById('summary-email').innerText = data.email;
+            document.getElementById('summary-attendees').innerText = `${data.attendees} ${data.attendees > 1 ? 'seats' : 'seat'}`;
+
+            document.getElementById('form-container').classList.add('hidden');
+            document.getElementById('success-container').classList.remove('hidden');
+        }
+
+        /**
+         * Reset Form to register another person
+         */
+        function resetRegistrationForm() {
+            document.getElementById('registration-form').reset();
+            document.getElementById('attendees').value = 1;
+            hideError();
+            
+            // Hide errors
+            ['full_name', 'email', 'phone', 'attendees'].forEach(hideFieldError);
+
+            document.getElementById('success-container').classList.add('hidden');
+            document.getElementById('form-container').classList.remove('hidden');
+        }
+
+        /**
+         * Modals Controls
+         */
+        function toggleConfigModal() {
+            const modal = document.getElementById('config-modal');
+            modal.classList.toggle('hidden');
+        }
+
+        function toggleSqlModal() {
+            const modal = document.getElementById('sql-modal');
+            modal.classList.toggle('hidden');
+        }
+
+        function saveSupabaseConfig() {
+            const url = document.getElementById('cfg-url').value.trim();
+            const key = document.getElementById('cfg-key').value.trim();
+
+            if (!url || !key) {
+                alert('Please enter both Supabase URL and Anon Key');
+                return;
+            }
+
+            localStorage.setItem('TWJGT_SUPABASE_URL', url);
+            localStorage.setItem('TWJGT_SUPABASE_KEY', key);
+
+            initSupabaseClient();
+            toggleConfigModal();
+        }
+
+        function clearSupabaseConfig() {
+            localStorage.removeItem('TWJGT_SUPABASE_URL');
+            localStorage.removeItem('TWJGT_SUPABASE_KEY');
+            document.getElementById('cfg-url').value = '';
+            document.getElementById('cfg-key').value = '';
+
+            initSupabaseClient();
+            toggleConfigModal();
+        }
+
+        function copySqlCode() {
+            const sqlText = document.getElementById('sql-code').innerText;
+            if (navigator.clipboard && navigator.clipboard.writeText) {
+                navigator.clipboard.writeText(sqlText);
+            } else {
+                const textarea = document.createElement('textarea');
+                textarea.value = sqlText;
+                document.body.appendChild(textarea);
+                textarea.select();
+                document.execCommand('copy');
+                document.body.removeChild(textarea);
+            }
+            alert('SQL Script copied to clipboard!');
+        }
+    </script>
+</body>
+</html>
